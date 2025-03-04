@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\gitprojects\moq-rs\moq-unity\NativePlugin\MoqNativePlugin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\gitprojects\moq-rs\moq-unity\NativePlugin\MoqNativePlugin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\gitprojects\moq-rs\moq-unity\NativePlugin\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{68789C61-77ED-3FE6-BDC5-6EC331E1BEE1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{CE4D4918-E490-3680-B509-246DD712B9BA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

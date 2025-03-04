@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Add MoQ libraries
 # This assumes you've built the MoQ libraries already and they're available
 if(WIN32)
-    set(MOQ_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/windows")
+    set(MOQ_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../target/release")
 elseif(APPLE)
     set(MOQ_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/macos")
 elseif(ANDROID)
@@ -29,11 +29,19 @@ add_library(MoqNativePlugin SHARED
 )
 
 # Link against MoQ libraries
-target_link_libraries(MoqNativePlugin
-    ${MOQ_LIB_DIR}/libmoq_transfork.a
-    ${MOQ_LIB_DIR}/libmoq_karp.a
-    ${MOQ_LIB_DIR}/libmoq_native.a
-)
+if(WIN32)
+    target_link_libraries(MoqNativePlugin
+        ${MOQ_LIB_DIR}/libmoq_transfork.rlib
+        ${MOQ_LIB_DIR}/libmoq_karp.rlib
+        ${MOQ_LIB_DIR}/libmoq_native.rlib
+    )
+else()
+    target_link_libraries(MoqNativePlugin
+        ${MOQ_LIB_DIR}/libmoq_transfork.a
+        ${MOQ_LIB_DIR}/libmoq_karp.a
+        ${MOQ_LIB_DIR}/libmoq_native.a
+    )
+endif()
 
 # Set output directory
 set_target_properties(MoqNativePlugin PROPERTIES

@@ -1,0 +1,3 @@
+C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/CMakeFiles/MoqNativePlugin.dir
+C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/CMakeFiles/ALL_BUILD.dir
+C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/CMakeFiles/ZERO_CHECK.dir

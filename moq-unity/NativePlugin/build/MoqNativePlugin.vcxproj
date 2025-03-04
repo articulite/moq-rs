@@ -1,0 +1,351 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B6D51537-9689-3A1C-BD66-29581B359C2E}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>MoqNativePlugin</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\gitprojects\moq-rs\moq-unity\NativePlugin\bin\Windows\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MoqNativePlugin.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MoqNativePlugin</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\gitprojects\moq-rs\moq-unity\NativePlugin\bin\Windows\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MoqNativePlugin.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MoqNativePlugin</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\gitprojects\moq-rs\moq-unity\NativePlugin\bin\Windows\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">MoqNativePlugin.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">MoqNativePlugin</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\gitprojects\moq-rs\moq-unity\NativePlugin\bin\Windows\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">MoqNativePlugin.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">MoqNativePlugin</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;CMAKE_INTDIR="Debug";MoqNativePlugin_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\";MoqNativePlugin_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_transfork.rlib;C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_karp.rlib;C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_native.rlib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/Debug/MoqNativePlugin.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/gitprojects/moq-rs/moq-unity/NativePlugin/bin/Windows/Debug/MoqNativePlugin.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";MoqNativePlugin_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";MoqNativePlugin_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_transfork.rlib;C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_karp.rlib;C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_native.rlib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/Release/MoqNativePlugin.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/gitprojects/moq-rs/moq-unity/NativePlugin/bin/Windows/Release/MoqNativePlugin.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel";MoqNativePlugin_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\";MoqNativePlugin_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_transfork.rlib;C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_karp.rlib;C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_native.rlib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/MinSizeRel/MoqNativePlugin.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/gitprojects/moq-rs/moq-unity/NativePlugin/bin/Windows/MinSizeRel/MoqNativePlugin.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo";MoqNativePlugin_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\";MoqNativePlugin_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\gitprojects\moq-rs\moq-unity\NativePlugin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_transfork.rlib;C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_karp.rlib;C:\gitprojects\moq-rs\moq-unity\NativePlugin\..\..\target\release\libmoq_native.rlib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/RelWithDebInfo/MoqNativePlugin.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/gitprojects/moq-rs/moq-unity/NativePlugin/bin/Windows/RelWithDebInfo/MoqNativePlugin.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\gitprojects\moq-rs\moq-unity\NativePlugin\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/gitprojects/moq-rs/moq-unity/NativePlugin/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\bin\cmake.exe -SC:/gitprojects/moq-rs/moq-unity/NativePlugin -BC:/gitprojects/moq-rs/moq-unity/NativePlugin/build --check-stamp-file C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCXXInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCommonLanguageInclude.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeGenericSystem.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeInitializeConfigs.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeLanguageInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeRCInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeSystemSpecificInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeSystemSpecificInitialize.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-Initialize.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\WindowsPaths.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeCCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeCXXCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeRCCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/gitprojects/moq-rs/moq-unity/NativePlugin/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\bin\cmake.exe -SC:/gitprojects/moq-rs/moq-unity/NativePlugin -BC:/gitprojects/moq-rs/moq-unity/NativePlugin/build --check-stamp-file C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCXXInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCommonLanguageInclude.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeGenericSystem.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeInitializeConfigs.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeLanguageInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeRCInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeSystemSpecificInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeSystemSpecificInitialize.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-Initialize.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\WindowsPaths.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeCCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeCXXCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeRCCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/gitprojects/moq-rs/moq-unity/NativePlugin/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\bin\cmake.exe -SC:/gitprojects/moq-rs/moq-unity/NativePlugin -BC:/gitprojects/moq-rs/moq-unity/NativePlugin/build --check-stamp-file C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCXXInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCommonLanguageInclude.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeGenericSystem.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeInitializeConfigs.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeLanguageInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeRCInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeSystemSpecificInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeSystemSpecificInitialize.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-Initialize.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\WindowsPaths.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeCCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeCXXCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeRCCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/gitprojects/moq-rs/moq-unity/NativePlugin/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\bin\cmake.exe -SC:/gitprojects/moq-rs/moq-unity/NativePlugin -BC:/gitprojects/moq-rs/moq-unity/NativePlugin/build --check-stamp-file C:/gitprojects/moq-rs/moq-unity/NativePlugin/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCXXInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeCommonLanguageInclude.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeGenericSystem.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeInitializeConfigs.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeLanguageInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeRCInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeSystemSpecificInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\CMakeSystemSpecificInitialize.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Compiler\MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-Initialize.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC-C.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows-MSVC.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\Windows.cmake;C:\Users\kaika\AppData\Local\Android\Sdk\cmake\3.31.1\share\cmake-3.31\Modules\Platform\WindowsPaths.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeCCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeCXXCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeRCCompiler.cmake;C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\3.31.1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\gitprojects\moq-rs\moq-unity\NativePlugin\MoqNativePlugin.cpp" />
+    <ClInclude Include="C:\gitprojects\moq-rs\moq-unity\NativePlugin\MoqNativePlugin.h" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="C:\gitprojects\moq-rs\moq-unity\NativePlugin\build\ZERO_CHECK.vcxproj">
+      <Project>{0C2833B9-6F53-33B0-9DD2-F2E4728BDA32}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

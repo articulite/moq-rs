@@ -14,7 +14,7 @@ cd ..
 if not exist ..\Assets\Plugins mkdir ..\Assets\Plugins
 
 rem Copy Windows DLL
-copy /Y bin\Windows\MoqNativePlugin.dll ..\Assets\Plugins\
+copy /Y bin\Windows\Release\MoqNativePlugin.dll ..\Assets\Plugins\
 
 echo Native plugin built and copied to Unity Plugins directory
 endlocal 
