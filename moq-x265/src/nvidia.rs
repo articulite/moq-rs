@@ -502,7 +502,7 @@ impl NvdecDecoder {
             self.initialize_decoder()?;
         }
         
-        tracing::debug!("Decoding frame of size: {} bytes", data.len());
+        tracing::info!("Decoding frame of size: {} bytes", data.len());
         
         // Clear any previously decoded frames
         {
@@ -521,7 +521,13 @@ impl NvdecDecoder {
                 // Increment frame count
                 self.frame_count += 1;
                 
-                tracing::debug!("Sending frame {} to parser", self.frame_count);
+                tracing::info!("Sending frame {} to parser", self.frame_count);
+                
+                // Print the first few bytes of the frame data for debugging
+                if data.len() >= 16 {
+                    let header = &data[0..16];
+                    tracing::info!("Frame header: {:02X?}", header);
+                }
                 
                 let result = ffi::cuvid::cuvidParseVideoData(parser, &mut packet as *mut _);
                 if result != 0 {
@@ -529,7 +535,7 @@ impl NvdecDecoder {
                     return Err(anyhow!("Failed to parse video data: {}", result));
                 }
                 
-                tracing::debug!("Successfully parsed video data");
+                tracing::info!("Successfully parsed video data");
             }
         } else {
             tracing::error!("Parser not initialized");
@@ -537,21 +543,21 @@ impl NvdecDecoder {
         }
         
         // Wait a bit for callbacks to complete
-        std::thread::sleep(std::time::Duration::from_millis(10));
+        std::thread::sleep(std::time::Duration::from_millis(20));
         
         // Get the decoded frame
         let decoded_frames = self.decoded_frames.lock().unwrap();
-        tracing::debug!("Number of decoded frames: {}", decoded_frames.len());
+        tracing::info!("Number of decoded frames: {}", decoded_frames.len());
         
         if !decoded_frames.is_empty() {
             // Return the first decoded frame
-            tracing::debug!("Returning decoded frame");
+            tracing::info!("Returning decoded frame");
             return Ok(Some(decoded_frames[0].clone()));
         }
         
         // If no frames were decoded but we have dimensions, create a placeholder frame
         if self.width > 0 && self.height > 0 {
-            tracing::debug!("Creating placeholder frame of size {}x{}", self.width, self.height);
+            tracing::info!("Creating placeholder frame of size {}x{}", self.width, self.height);
             let mut buffer = ImageBuffer::new(self.width, self.height);
             
             // Fill with a solid color (gray)

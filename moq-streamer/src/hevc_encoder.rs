@@ -58,8 +58,27 @@ impl HEVCEncoder {
     }
     
     pub fn encode_frame(&mut self, frame: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<EncodedFrame> {
-        // Encode the frame using the selected encoder
-        self.encoder.encode(frame)
+        // Log the frame dimensions
+        tracing::info!("Encoding frame of size: {}x{}", frame.width(), frame.height());
+        
+        // Encode the frame
+        let encoded_frame = self.encoder.encode(frame)?;
+        
+        // Log the encoded frame details
+        tracing::info!(
+            "Encoded frame: size={} bytes, keyframe={}, timestamp={}ms",
+            encoded_frame.data.len(),
+            encoded_frame.is_keyframe,
+            encoded_frame.timestamp.as_millis()
+        );
+        
+        // Print the first few bytes of the encoded frame for debugging
+        if encoded_frame.data.len() >= 16 {
+            let header = &encoded_frame.data[0..16];
+            tracing::info!("Encoded frame header: {:02X?}", header);
+        }
+        
+        Ok(encoded_frame)
     }
     
     pub fn is_using_hardware(&self) -> bool {
