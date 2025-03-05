@@ -2,6 +2,9 @@ use anyhow::Result;
 use image::{ImageBuffer, Rgba};
 use moq_x265::{X265Encoder, X265Decoder, EncodedFrame};
 use std::time::{Duration, Instant};
+use std::fs::File;
+use std::io::Write;
+use std::path::Path;
 
 fn main() -> Result<()> {
     println!("Testing x265 encoder and decoder...");
@@ -35,6 +38,13 @@ fn main() -> Result<()> {
     let mut encoded_frames = Vec::new();
     let start_time = Instant::now();
     
+    // Create output directory if it doesn't exist
+    let output_dir = Path::new("output");
+    if !output_dir.exists() {
+        std::fs::create_dir(output_dir)?;
+        println!("Created output directory");
+    }
+    
     for frame_idx in 0..total_frames {
         // Create a test frame (alternating between purple and blue)
         let is_purple = frame_idx % 2 == 0;
@@ -56,6 +66,20 @@ fn main() -> Result<()> {
         match encoder.encode_frame(&img) {
             Ok(frame) => {
                 println!("  Encoded: {} bytes, keyframe: {}", frame.data.len(), frame.is_keyframe);
+                
+                // Save the first frame and keyframes to disk
+                if frame_idx == 0 || frame.is_keyframe {
+                    let filename = if frame_idx == 0 {
+                        format!("output/first_frame.hevc")
+                    } else {
+                        format!("output/keyframe_{}.hevc", frame_idx)
+                    };
+                    
+                    let mut file = File::create(&filename)?;
+                    file.write_all(&frame.data)?;
+                    println!("  Saved frame to {}", filename);
+                }
+                
                 encoded_frames.push(frame);
             },
             Err(e) => {
@@ -76,6 +100,14 @@ fn main() -> Result<()> {
              encoded_frames.len(), 
              encoding_time,
              encoded_frames.len() as f64 / encoding_time.as_secs_f64());
+    
+    // Save all frames to a single file
+    let all_frames_path = "output/all_frames.hevc";
+    let mut all_frames_file = File::create(all_frames_path)?;
+    for frame in &encoded_frames {
+        all_frames_file.write_all(&frame.data)?;
+    }
+    println!("Saved all frames to {}", all_frames_path);
     
     // Decode frames
     let start_time = Instant::now();
