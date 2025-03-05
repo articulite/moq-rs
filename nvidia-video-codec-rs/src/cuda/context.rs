@@ -36,6 +36,11 @@ impl CuContext {
         // We don't have cuCtxGetCurrent in our minimal bindings, so we'll just create a new context
         Ok(Self { context })
     }
+    
+    // Add a method to get the raw CUDA context pointer
+    pub fn context(&self) -> ffi::cuda::CUcontext {
+        self.context
+    }
 }
 
 impl Drop for CuContext {
