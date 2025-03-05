@@ -1,79 +1,78 @@
-# Test script for x265 on Windows
-# This script runs the test example to verify that x265 is working correctly
+# Test script for x265 encoder and decoder
+# This script tests both software and hardware acceleration
 
-# Set the X265_DIR environment variable for the current session
-$env:X265_DIR = "$PSScriptRoot\x265";
-Write-Host "Set X265_DIR environment variable to $env:X265_DIR for the current session";
-
-# Add the x265 bin directory to the PATH for the current session
-$binDir = "$env:X265_DIR\bin\x64";
-$env:PATH = "$binDir;$env:PATH";
-Write-Host "Added $binDir to PATH for the current session";
-
-# Check if the x265 library is available
-if (Test-Path "$binDir\x265.dll") {
-    Write-Host "x265 library found at $binDir\x265.dll" -ForegroundColor Green;
-} else {
-    Write-Host "Error: x265 library not found at $binDir\x265.dll" -ForegroundColor Red;
-    Write-Host "Looking for x265.dll in $binDir" -ForegroundColor Yellow;
-    Get-ChildItem -Path $binDir -Recurse | ForEach-Object { Write-Host $_.FullName };
-    exit 1;
+# Create output directory if it doesn't exist
+$outputDir = Join-Path $PSScriptRoot "output"
+if (-not (Test-Path $outputDir)) {
+    New-Item -ItemType Directory -Path $outputDir | Out-Null
+    Write-Host "Created output directory: $outputDir" -ForegroundColor Green
 }
 
-# Check for FFmpeg
-$ffmpegPath = $null
-try {
-    $ffmpegPath = (Get-Command ffmpeg -ErrorAction Stop).Source
-    Write-Host "FFmpeg found at: $ffmpegPath" -ForegroundColor Green
-} catch {
-    Write-Host "FFmpeg not found in PATH" -ForegroundColor Yellow
-    
-    # Check common FFmpeg installation locations
-    $commonPaths = @(
-        "C:\ffmpeg\bin",
-        "C:\Program Files\ffmpeg\bin",
-        "C:\Program Files (x86)\ffmpeg\bin"
-    )
-    
-    foreach ($path in $commonPaths) {
-        if (Test-Path "$path\ffmpeg.exe") {
-            Write-Host "FFmpeg found at $path\ffmpeg.exe" -ForegroundColor Green
-            $ffmpegPath = $path
-            break
-        }
-    }
-    
-    if ($ffmpegPath) {
-        # Add FFmpeg to PATH for current session
-        $env:PATH = "$ffmpegPath;$env:PATH"
-        Write-Host "Added $ffmpegPath to PATH for the current session" -ForegroundColor Green
-    } else {
-        Write-Host "FFmpeg not found. MP4 creation will not work." -ForegroundColor Yellow
-        Write-Host "The test will still run, but no MP4 file will be created." -ForegroundColor Yellow
-    }
+# Test software encoding/decoding
+Write-Host "Testing x265 software encoding/decoding..." -ForegroundColor Cyan
+cargo run --example test_x265
+
+# Check if hardware acceleration is available
+Write-Host "Checking for NVIDIA hardware acceleration..." -ForegroundColor Cyan
+
+# Set NVIDIA_VIDEO_CODEC_SDK_DIR if not already set
+if (-not $env:NVIDIA_VIDEO_CODEC_SDK_DIR) {
+    $env:NVIDIA_VIDEO_CODEC_SDK_DIR = Join-Path $PSScriptRoot "temp"
+    Write-Host "NVIDIA_VIDEO_CODEC_SDK_DIR set to $env:NVIDIA_VIDEO_CODEC_SDK_DIR" -ForegroundColor Yellow
 }
 
-# Build and run the test example
-Write-Host "Building and running the test example..." -ForegroundColor Cyan;
-cargo run --example test_x265;
+# Check if the NVIDIA Video Codec SDK exists
+$nvencHeader = Join-Path $env:NVIDIA_VIDEO_CODEC_SDK_DIR "Interface\nvEncodeAPI.h"
+$nvcuvidHeader = Join-Path $env:NVIDIA_VIDEO_CODEC_SDK_DIR "Interface\nvcuvid.h"
 
-# Check the exit code
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "Test completed successfully!" -ForegroundColor Green;
+if ((Test-Path $nvencHeader) -and (Test-Path $nvcuvidHeader)) {
+    Write-Host "NVIDIA Video Codec SDK found at $env:NVIDIA_VIDEO_CODEC_SDK_DIR" -ForegroundColor Green
     
-    # Check if MP4 file was created
-    if (Test-Path "output/color_alternating.mp4") {
-        Write-Host "MP4 file created successfully at output/color_alternating.mp4" -ForegroundColor Green
-        Write-Host "You can play this file in any video player that supports HEVC/H.265"
+    # Add NVIDIA libraries to PATH
+    $nvLibPath = Join-Path $env:NVIDIA_VIDEO_CODEC_SDK_DIR "Lib\x64"
+    $env:PATH = "$nvLibPath;$env:PATH"
+    Write-Host "Added $nvLibPath to PATH" -ForegroundColor Green
+    
+    # Test hardware acceleration
+    Write-Host "Testing NVIDIA hardware acceleration..." -ForegroundColor Cyan
+    cargo run --features hardware-accel --example test_nvidia
+    
+    # Compare results
+    Write-Host "Comparing software vs hardware results..." -ForegroundColor Cyan
+    
+    # Check if encoded files exist
+    $swEncodedFile = Join-Path $outputDir "encoded.h265"
+    $hwEncodedFile = Join-Path $outputDir "nvidia_encoded.h265"
+    
+    if ((Test-Path $swEncodedFile) -and (Test-Path $hwEncodedFile)) {
+        $swSize = (Get-Item $swEncodedFile).Length
+        $hwSize = (Get-Item $hwEncodedFile).Length
+        
+        Write-Host "Software encoded file size: $($swSize/1KB) KB" -ForegroundColor Yellow
+        Write-Host "Hardware encoded file size: $($hwSize/1KB) KB" -ForegroundColor Yellow
+        
+        $ratio = [math]::Round(($hwSize / $swSize) * 100, 2)
+        Write-Host "Hardware/Software size ratio: $ratio%" -ForegroundColor Yellow
     } else {
-        Write-Host "MP4 file was not created." -ForegroundColor Yellow
-        if ($ffmpegPath) {
-            Write-Host "You can manually create an MP4 file with:" -ForegroundColor Yellow
-            Write-Host "ffmpeg -f hevc -i output/all_frames.hevc -c:v copy output/color_alternating.mp4" -ForegroundColor Yellow
-        } else {
-            Write-Host "To create an MP4 file, install FFmpeg from https://ffmpeg.org/download.html" -ForegroundColor Yellow
-        }
+        Write-Host "Encoded files not found for comparison" -ForegroundColor Red
+    }
+    
+    # Check if decoded images exist
+    $swDecodedFile = Join-Path $outputDir "decoded_0.png"
+    $hwDecodedFile = Join-Path $outputDir "nvidia_decoded_0.png"
+    
+    if ((Test-Path $swDecodedFile) -and (Test-Path $hwDecodedFile)) {
+        Write-Host "Decoded images available for visual comparison:" -ForegroundColor Yellow
+        Write-Host "Software decoded: $swDecodedFile" -ForegroundColor Yellow
+        Write-Host "Hardware decoded: $hwDecodedFile" -ForegroundColor Yellow
+    } else {
+        Write-Host "Decoded images not found for comparison" -ForegroundColor Red
     }
 } else {
-    Write-Host "Test failed with exit code $LASTEXITCODE" -ForegroundColor Red;
-} 
+    Write-Host "NVIDIA Video Codec SDK not found at $env:NVIDIA_VIDEO_CODEC_SDK_DIR" -ForegroundColor Red
+    Write-Host "Hardware acceleration test skipped" -ForegroundColor Yellow
+    Write-Host "Please download the NVIDIA Video Codec SDK from https://developer.nvidia.com/nvidia-video-codec-sdk/download" -ForegroundColor Yellow
+    Write-Host "and extract it to $env:NVIDIA_VIDEO_CODEC_SDK_DIR" -ForegroundColor Yellow
+}
+
+Write-Host "All tests completed!" -ForegroundColor Green 

@@ -2,6 +2,36 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    // Check if hardware acceleration is enabled
+    let hardware_accel = env::var("CARGO_FEATURE_HARDWARE_ACCEL").is_ok();
+    
+    if hardware_accel {
+        println!("cargo:rustc-cfg=feature=\"hardware-accel\"");
+        println!("cargo:warning=Building with NVIDIA hardware acceleration support");
+        
+        // Check if NVIDIA_VIDEO_CODEC_SDK_DIR environment variable is set
+        if let Ok(nvidia_sdk_dir) = env::var("NVIDIA_VIDEO_CODEC_SDK_DIR") {
+            // We're using the nvidia-video-codec-rs crate, so we don't need to link directly
+            // Just print some debug information
+            println!("cargo:warning=Using NVIDIA Video Codec SDK from {}", nvidia_sdk_dir);
+            
+            // Verify that the SDK exists
+            let nvenc_header = format!("{}/Interface/nvEncodeAPI.h", nvidia_sdk_dir);
+            let nvcuvid_header = format!("{}/Interface/nvcuvid.h", nvidia_sdk_dir);
+            
+            if std::path::Path::new(&nvenc_header).exists() && std::path::Path::new(&nvcuvid_header).exists() {
+                println!("cargo:warning=Found NVIDIA headers, hardware acceleration enabled");
+            } else {
+                println!("cargo:warning=NVIDIA headers not found at {} and {}", nvenc_header, nvcuvid_header);
+                println!("cargo:warning=Hardware acceleration will be disabled");
+            }
+        } else {
+            println!("cargo:warning=NVIDIA_VIDEO_CODEC_SDK_DIR environment variable not set.");
+            println!("cargo:warning=Hardware acceleration will be disabled.");
+            println!("cargo:warning=Download the NVIDIA Video Codec SDK from https://developer.nvidia.com/nvidia-video-codec-sdk/download");
+        }
+    }
+    
     // Try to find x265 using pkg-config
     if let Ok(lib) = pkg_config::probe_library("x265") {
         for include in &lib.include_paths {

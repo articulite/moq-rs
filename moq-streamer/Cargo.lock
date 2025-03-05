@@ -1333,6 +1333,7 @@ dependencies = [
  "bytes",
  "cc",
  "image",
+ "lazy_static",
  "libc",
  "pkg-config",
  "thiserror 1.0.69",
