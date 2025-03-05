@@ -83,6 +83,18 @@ For example:
 
 See the [moq-web README](moq-web/README.md) for more information.
 
+## moq-receiver
+
+[moq-receiver](moq-receiver) is a desktop application that can connect to a MoQ relay server and display video streams. It uses SDL2 for rendering and window management.
+
+```bash
+# Build and run the receiver
+cd moq-receiver
+cargo run -- --server https://localhost:4443 --name desktop
+```
+
+See the [moq-receiver README](moq-receiver/README.md) for more information on setup and usage, including SDL2 installation instructions.
+
 ## moq-karp
 
 [moq-karp](moq-karp) is a simple media layer on top of MoQ.

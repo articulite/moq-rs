@@ -6,7 +6,7 @@ members = [
 	"moq-native",
 	"moq-karp",
 	"moq-web",
-	"moq-async",
+	"moq-async", "moq-receiver",
 ]
 resolver = "2"
 

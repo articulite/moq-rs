@@ -1,0 +1,16 @@
+[package]
+name = "moq-receiver"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+clap = { version = "4.0", features = ["derive"] }
+tracing = "0.1"
+tokio = { version = "1", features = ["full"] }
+url = "2.3"
+moq-native = { path = "../moq-native" }
+moq-transfork = { path = "../moq-transfork" }
+moq-karp = { path = "../moq-karp" }
+image = "0.24"
+sdl2 = "0.35"
