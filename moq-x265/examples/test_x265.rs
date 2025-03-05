@@ -47,8 +47,8 @@ fn main() -> Result<()> {
     }
     
     for frame_idx in 0..total_frames {
-        // Create a test frame (alternating between purple and blue)
-        let is_purple = frame_idx % 2 == 0;
+        // Create a test frame (alternating between purple and blue every second)
+        let is_purple = (frame_idx / fps) % 2 == 0; // Change color every second instead of every frame
         let mut img = ImageBuffer::new(width, height);
         
         for (_, _, pixel) in img.enumerate_pixels_mut() {
