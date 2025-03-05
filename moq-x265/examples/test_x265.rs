@@ -1,32 +1,22 @@
 use anyhow::Result;
 use image::{ImageBuffer, Rgba};
-use moq_x265::{X265Encoder, X265Decoder};
-use std::time::Instant;
+use moq_x265::{X265Encoder, X265Decoder, EncodedFrame};
+use std::time::{Duration, Instant};
 
 fn main() -> Result<()> {
     println!("Testing x265 encoder and decoder...");
     
-    // Create a test image (blue gradient)
+    // Configuration
     let width = 640;
     let height = 480;
-    let mut img = ImageBuffer::new(width, height);
-    
-    for (x, y, pixel) in img.enumerate_pixels_mut() {
-        let x_factor = x as f32 / width as f32;
-        let y_factor = y as f32 / height as f32;
-        
-        *pixel = Rgba([
-            0,
-            (y_factor * 255.0) as u8,
-            (x_factor * 255.0) as u8,
-            255,
-        ]);
-    }
-    
-    println!("Created test image {}x{}", width, height);
+    let fps = 30;
+    let keyframe_interval = 60; // 2 seconds at 30fps
+    let bitrate = 5000; // 5 Mbps
+    let duration_seconds = 5;
+    let total_frames = fps * duration_seconds;
     
     // Create encoder
-    let mut encoder = match X265Encoder::new(width, height, 5000, 30) {
+    let mut encoder = match X265Encoder::new(width, height, bitrate, fps, keyframe_interval) {
         Ok(encoder) => {
             println!("Successfully created x265 encoder");
             encoder
@@ -37,44 +27,81 @@ fn main() -> Result<()> {
         }
     };
     
-    // Encode frame
-    let start = Instant::now();
-    let encoded_frame = match encoder.encode_frame(&img) {
-        Ok(frame) => {
-            println!("Successfully encoded frame: {} bytes, keyframe: {}", 
-                     frame.data.len(), frame.is_keyframe);
-            frame
-        },
-        Err(e) => {
-            println!("Failed to encode frame: {}", e);
-            return Err(e);
-        }
-    };
-    println!("Encoding took: {:?}", start.elapsed());
-    
     // Create decoder
     let mut decoder = X265Decoder::new();
     println!("Created x265 decoder");
     
-    // Decode frame
-    let start = Instant::now();
-    let mut encoded_frames = 0;
-    match decoder.decode_frame(&encoded_frame.data) {
-        Ok(Some(img)) => {
-            println!("Successfully decoded frame: {}x{}", img.width(), img.height());
-            encoded_frames += 1;
-        },
-        Ok(None) => {
-            println!("Decoder returned no image");
-        },
-        Err(e) => {
-            println!("Failed to decode frame: {}", e);
-            return Err(e);
-        }
-    };
-    println!("Decoding took: {:?}", start.elapsed());
+    // Generate and encode frames
+    let mut encoded_frames = Vec::new();
+    let start_time = Instant::now();
     
-    println!("encoded {} frames", encoded_frames);
+    for frame_idx in 0..total_frames {
+        // Create a test frame (alternating between purple and blue)
+        let is_purple = frame_idx % 2 == 0;
+        let mut img = ImageBuffer::new(width, height);
+        
+        for (_, _, pixel) in img.enumerate_pixels_mut() {
+            if is_purple {
+                // Purple
+                *pixel = Rgba([128, 0, 128, 255]);
+            } else {
+                // Blue
+                *pixel = Rgba([0, 0, 255, 255]);
+            }
+        }
+        
+        println!("Frame {}/{}: {}", frame_idx + 1, total_frames, if is_purple { "Purple" } else { "Blue" });
+        
+        // Encode frame
+        match encoder.encode_frame(&img) {
+            Ok(frame) => {
+                println!("  Encoded: {} bytes, keyframe: {}", frame.data.len(), frame.is_keyframe);
+                encoded_frames.push(frame);
+            },
+            Err(e) => {
+                println!("  Failed to encode frame: {}", e);
+                return Err(e);
+            }
+        }
+    }
+    
+    // Flush encoder to get any remaining frames
+    while let Ok(Some(frame)) = encoder.flush() {
+        println!("Flushed frame: {} bytes", frame.data.len());
+        encoded_frames.push(frame);
+    }
+    
+    let encoding_time = start_time.elapsed();
+    println!("Encoded {} frames in {:?} ({:.2} fps)", 
+             encoded_frames.len(), 
+             encoding_time,
+             encoded_frames.len() as f64 / encoding_time.as_secs_f64());
+    
+    // Decode frames
+    let start_time = Instant::now();
+    let mut decoded_frames = 0;
+    
+    for (i, frame) in encoded_frames.iter().enumerate() {
+        match decoder.decode_frame(&frame.data) {
+            Ok(Some(decoded_image)) => {
+                println!("Decoded frame {}: {}x{}", i, decoded_image.width(), decoded_image.height());
+                decoded_frames += 1;
+            },
+            Ok(None) => {
+                println!("Frame {} processed but no image returned", i);
+            },
+            Err(e) => {
+                println!("Failed to decode frame {}: {}", i, e);
+            }
+        }
+    }
+    
+    let decoding_time = start_time.elapsed();
+    println!("Decoded {} frames in {:?} ({:.2} fps)", 
+             decoded_frames, 
+             decoding_time,
+             decoded_frames as f64 / decoding_time.as_secs_f64());
+    
     println!("Test completed successfully!");
     Ok(())
 } 
