@@ -1,29 +1,6 @@
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 use image::{ImageBuffer, Rgba};
-use std::time::{Duration, Instant};
-use windows::{
-    Media::MediaProperties::*,
-    Media::Transcoding::*,
-    Storage::Streams::*,
-    Win32::Media::MediaFoundation::*,
-};
 use moq_x265::{X265Encoder, EncodedFrame};
-
-// Initialize Media Foundation
-pub fn init_media_foundation() -> Result<()> {
-    unsafe {
-        MFStartup(MF_VERSION, MFSTARTUP_FULL)?;
-    }
-    Ok(())
-}
-
-// Shutdown Media Foundation
-pub fn shutdown_media_foundation() -> Result<()> {
-    unsafe {
-        MFShutdown()?;
-    }
-    Ok(())
-}
 
 // Initialize x265
 pub fn init_x265() -> Result<()> {
@@ -47,8 +24,9 @@ pub struct HEVCEncoder {
 
 impl HEVCEncoder {
     pub fn new(width: u32, height: u32, bitrate: u32, fps: u32) -> Result<Self> {
-        // Initialize x265 encoder
-        let encoder = X265Encoder::new(width, height, bitrate, fps)?;
+        // Default keyframe interval to 2 seconds (2 * fps)
+        let keyframe_interval = 2 * fps;
+        let encoder = X265Encoder::new(width, height, bitrate, fps, keyframe_interval)?;
         
         Ok(Self {
             width,

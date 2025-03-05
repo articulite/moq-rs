@@ -181,3 +181,81 @@ Licensed under either:
 
 -   Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
 -   MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+# MoQ Streaming System
+
+This repository contains a Media over QUIC (MoQ) implementation for streaming video.
+
+## Components
+
+- **MoQ Relay**: A server that relays media streams between publishers and subscribers
+- **MoQ Streamer**: A client that captures the screen and publishes it to the relay server
+- **MoQ Receiver**: A client that subscribes to streams from the relay server and displays them
+
+## Prerequisites
+
+- Windows 10 or later
+- Rust and Cargo installed
+- x265 library (included in the repository)
+- SDL2 library (included in the repository)
+- FFmpeg (for MP4 container creation)
+
+## Getting Started
+
+### Using the PowerShell Scripts
+
+The repository includes several PowerShell scripts to simplify running the components:
+
+1. **start-relay.ps1**: Starts the MoQ relay server
+2. **start-streamer.ps1**: Starts the MoQ streamer (publisher)
+3. **start-receiver.ps1**: Starts the MoQ receiver (subscriber)
+4. **start-all.ps1**: Starts all components in the correct order
+
+To run the entire system at once:
+
+```powershell
+.\start-all.ps1
+```
+
+This will open three PowerShell windows, one for each component.
+
+### Running Components Individually
+
+If you prefer to run components individually:
+
+1. First, start the relay server:
+```powershell
+.\start-relay.ps1
+```
+
+2. Then, start the streamer:
+```powershell
+.\start-streamer.ps1
+```
+
+3. Finally, start the receiver:
+```powershell
+.\start-receiver.ps1
+```
+
+## Configuration
+
+The scripts use default configuration values. If you need to modify them:
+
+- Edit the PowerShell scripts directly to change parameters like resolution, bitrate, etc.
+- The default resolution is 640x480
+- The default bitrate is 2000 kbps
+- The default frame rate is 30 fps
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Make sure all environment variables are set correctly
+2. Check that the x265 library is properly installed
+3. Verify that SDL2 is available
+4. Ensure that the relay server is running before starting the streamer and receiver
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

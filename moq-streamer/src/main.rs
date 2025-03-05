@@ -154,22 +154,44 @@ async fn main() -> Result<()> {
     // Initialize x265
     init_x265()?;
     
+    // Set up a Ctrl+C handler
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    
+    tokio::spawn(async move {
+        if let Err(e) = tokio::signal::ctrl_c().await {
+            eprintln!("Failed to listen for Ctrl+C: {}", e);
+        }
+        let _ = tx.send(());
+    });
+    
     info!("Started streaming. Press Ctrl+C to stop.");
     
     // Main capture and encoding loop
-    loop {
-        // Capture frame
-        let frame = capturer.capture_frame().await?;
-        
-        // Encode frame with HEVC
-        let encoded = hevc_encoder.encode_frame(&frame)?;
-        
-        // Publish frame
-        publisher.publish_frame(encoded).await?;
-    }
+    tokio::select! {
+        result = async {
+            loop {
+                // Capture frame
+                let frame = capturer.capture_frame().await?;
+                
+                // Encode frame with HEVC
+                let encoded = hevc_encoder.encode_frame(&frame)?;
+                
+                // Publish frame
+                publisher.publish_frame(encoded).await?;
+            }
+            #[allow(unreachable_code)]
+            Ok::<(), anyhow::Error>(())
+        } => result,
+        _ = rx => {
+            info!("Received shutdown signal");
+            Ok(())
+        }
+    }?;
     
     // Cleanup
+    info!("Shutting down x265...");
     shutdown_x265()?;
     
+    info!("Streamer stopped");
     Ok(())
 } 

@@ -5,7 +5,7 @@ use moq_transfork::{Session, coding::Bytes};
 use tracing::{info, warn};
 use url::Url;
 
-use crate::hevc_encoder::EncodedFrame;
+use moq_x265::EncodedFrame;
 
 pub struct MoqPublisher {
     broadcast: BroadcastProducer,
