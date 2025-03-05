@@ -35,11 +35,11 @@ pub enum X265Error {
 }
 
 // Define traits for encoders and decoders
-pub trait Encoder {
+pub trait Encoder: Send + Sync {
     fn encode(&mut self, frame: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<EncodedFrame>;
 }
 
-pub trait Decoder {
+pub trait Decoder: Send + Sync {
     fn decode(&mut self, data: &[u8]) -> Result<Option<ImageBuffer<Rgba<u8>, Vec<u8>>>>;
 }
 
