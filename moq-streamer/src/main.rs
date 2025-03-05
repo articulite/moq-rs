@@ -28,6 +28,38 @@ impl From<LogArgs> for moq_native::log::Args {
     }
 }
 
+// Create a wrapper struct for moq_native::tls::Args to implement Debug
+#[derive(Parser, Debug)]
+struct TlsArgs {
+    /// Use the certificates at this path, encoded as PEM.
+    #[clap(long = "tls-cert", value_delimiter = ',')]
+    cert: Vec<std::path::PathBuf>,
+
+    /// Use the private key at this path, encoded as PEM.
+    #[clap(long = "tls-key", value_delimiter = ',')]
+    key: Vec<std::path::PathBuf>,
+
+    /// Use the TLS root at this path, encoded as PEM.
+    #[clap(long = "tls-root", value_delimiter = ',')]
+    root: Vec<std::path::PathBuf>,
+
+    /// Danger: Disable TLS certificate verification.
+    #[clap(long = "tls-disable-verify")]
+    disable_verify: bool,
+}
+
+impl From<TlsArgs> for moq_native::tls::Args {
+    fn from(args: TlsArgs) -> Self {
+        moq_native::tls::Args {
+            cert: args.cert,
+            key: args.key,
+            root: args.root,
+            disable_verify: args.disable_verify,
+            self_sign: Vec::new(),
+        }
+    }
+}
+
 #[derive(Parser, Debug)]
 #[clap(author, version, about = "MoQ Desktop Streamer")]
 struct Args {
@@ -62,6 +94,10 @@ struct Args {
     /// Log configuration
     #[clap(flatten)]
     log: LogArgs,
+    
+    /// TLS configuration
+    #[clap(flatten)]
+    tls: TlsArgs,
 }
 
 #[tokio::main]
@@ -76,6 +112,9 @@ async fn main() -> Result<()> {
     // Parse the server URL
     let server_url = Url::parse(&args.server)
         .context("Invalid server URL")?;
+    
+    // Convert TLS args
+    let tls_args: moq_native::tls::Args = args.tls.into();
     
     info!("Starting MoQ Desktop Streamer");
     info!("Server: {}", server_url);
@@ -100,6 +139,7 @@ async fn main() -> Result<()> {
         args.width,
         args.height,
         args.bitrate,
+        tls_args,
     ).await?;
     
     // Initialize HEVC encoder

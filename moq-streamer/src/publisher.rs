@@ -22,11 +22,12 @@ impl MoqPublisher {
         width: u32,
         height: u32,
         bitrate: u32,
+        tls_args: moq_native::tls::Args,
     ) -> Result<Self> {
         // Initialize QUIC endpoint
         let quic_config = quic::Config {
             bind: "[::]:0".parse().unwrap(),
-            tls: moq_native::tls::Args::default().load().context("Failed to load TLS config")?,
+            tls: tls_args.load().context("Failed to load TLS config")?,
         };
         
         let quic = quic::Endpoint::new(quic_config)

@@ -1,0 +1,6 @@
+[tls]
+cert_path = "../certs/cert.pem"
+key_path = "../certs/key.pem"
+
+[server]
+bind = "0.0.0.0:4443" 
