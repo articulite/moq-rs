@@ -273,7 +273,7 @@ fn process_frame(
 	let data = &frame.payload;
 	
 	// Log frame information
-	tracing::debug!("Processing frame: {} bytes", data.len());
+	tracing::info!("Processing frame: {} bytes, keyframe: {}", data.len(), frame.keyframe);
 	
 	// Skip empty frames
 	if data.len() <= 4 {
@@ -285,10 +285,15 @@ fn process_frame(
 	let mut decoder = DECODER.lock().unwrap();
 	match decoder.decode(data) {
 		Ok(Some(image)) => {
+			// Log image details
+			tracing::info!("Decoded image: {}x{}", image.width(), image.height());
+			
 			// Convert the image to RGB format for SDL
 			let pitch = width as usize * 3; // RGB = 3 bytes per pixel
 			let height = texture.query().height;
 			let mut rgb_data = vec![0u8; pitch * height as usize];
+			
+			tracing::debug!("Texture dimensions: {}x{}, pitch: {}", width, height, pitch);
 			
 			// Copy the image data to the RGB buffer
 			for y in 0..height {
@@ -303,6 +308,15 @@ fn process_frame(
 						}
 					}
 				}
+			}
+			
+			// Sample a few pixels to verify data
+			if frame.keyframe {
+				let center_x = image.width() / 2;
+				let center_y = image.height() / 2;
+				let center_pixel = image.get_pixel(center_x, center_y);
+				tracing::info!("Center pixel RGBA: [{}, {}, {}, {}]", 
+					center_pixel[0], center_pixel[1], center_pixel[2], center_pixel[3]);
 			}
 			
 			// Update the texture with the decoded image
@@ -320,6 +334,7 @@ fn process_frame(
 			}
 		},
 		Ok(None) => {
+			tracing::warn!("Decoder returned None for frame");
 			// If decoding failed or no frame was produced, show a blue screen as fallback
 			let pitch = width as usize * 3; // RGB = 3 bytes per pixel
 			let height = texture.query().height;
@@ -332,17 +347,11 @@ fn process_frame(
 				pixel[2] = 255;  // B
 			}
 			
-			// Add frame number as text (simple visualization)
-			let frame_number = frame.timestamp.as_secs_f32() * 30.0; // Approximate frame number
-			if frame.keyframe {
-				tracing::info!("Keyframe received but not decoded at timestamp: {:?}", frame.timestamp);
-			}
-			
-			// Update the texture with our placeholder
+			// Update the texture with the blue screen
 			match texture.update(None, &rgb_data, pitch) {
 				Ok(_) => Ok(()),
 				Err(e) => {
-					tracing::error!("Failed to update texture: {}", e);
+					tracing::error!("Failed to update texture with blue screen: {}", e);
 					Err(anyhow::anyhow!("Failed to update texture: {}", e))
 				}
 			}

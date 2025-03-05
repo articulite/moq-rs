@@ -31,6 +31,9 @@ if (Test-Path "$PSScriptRoot\moq-x265\temp\Interface\nvEncodeAPI.h") {
     $cudaBinPath = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\bin"
     if (Test-Path $cudaBinPath) {
         $env:PATH = "$cudaBinPath;$env:PATH"
+        Write-Host "Added CUDA Toolkit to PATH: $cudaBinPath" -ForegroundColor Green
+    } else {
+        Write-Host "CUDA Toolkit not found at $cudaBinPath, hardware acceleration may not work properly" -ForegroundColor Yellow
     }
 } else {
     Write-Host "NVIDIA Video Codec SDK not found, using software encoding/decoding" -ForegroundColor Yellow
