@@ -175,7 +175,7 @@ impl NvencEncoder {
         unsafe {
             if let Some(device_ptr) = self.input_buffer {
                 // In a real implementation, we would use cuMemcpy2D_v2 instead of cuMemcpyHtoD_v2
-                // For now, we'll just simulate copying the frame data
+                // For now, we'll just simulate copying the frame data to CUDA device memory
                 tracing::debug!("Simulating copying frame data to CUDA device memory");
                 
                 // Create the output NAL unit
@@ -287,13 +287,48 @@ unsafe impl Sync for NvdecDecoder {}
 
 #[cfg(feature = "hardware-accel")]
 extern "C" fn handle_video_sequence(user_data: *mut c_void, video_format: *mut ffi::cuvid::CUVIDEOFORMAT) -> i32 {
-    unsafe {
-        tracing::info!("Video sequence callback called");
-        let decoder = &mut *(user_data as *mut NvdecDecoder);
-        let result = decoder.handle_video_sequence(video_format);
-        tracing::info!("Video sequence callback returned: {}", result);
-        result
+    tracing::info!("CUVID sequence callback called!");
+    
+    // Safety check
+    if user_data.is_null() {
+        tracing::error!("Null user_data in sequence callback");
+        return 0; // Failure
     }
+    
+    if video_format.is_null() {
+        tracing::error!("Null video_format in sequence callback");
+        return 0; // Failure
+    }
+    
+    let decoder = unsafe { &mut *(user_data as *mut NvdecDecoder) };
+    tracing::info!("Video sequence callback with decoder at {:p}", decoder);
+    
+    // Extract parameters from video format
+    let codec_type = unsafe { (*video_format).codec };
+    let codec_name = match codec_type {
+        ffi::cuvid::cudaVideoCodec_HEVC => "HEVC",
+        // H264 constant is not available in the bindings
+        // ffi::cuvid::cudaVideoCodec_H264 => "H264",
+        _ => "Unknown",
+    };
+    
+    tracing::info!("Video sequence: codec={} ({:?})", codec_name, codec_type);
+    
+    unsafe {
+        let width = (*video_format).coded_width;
+        let height = (*video_format).coded_height;
+        let chroma_format = (*video_format).chroma_format;
+        let bit_depth_luma = (*video_format).bit_depth_luma_minus8 + 8;
+        let bit_depth_chroma = (*video_format).bit_depth_chroma_minus8 + 8;
+        
+        tracing::info!("Video format: {}x{}, chroma={}, bit depth luma={}, chroma={}", 
+                  width, height, chroma_format, bit_depth_luma, bit_depth_chroma);
+    }
+    
+    // Call the instance method
+    let result = decoder.handle_video_sequence(video_format);
+    tracing::info!("handle_video_sequence result: {}", result);
+    result
 }
 
 #[cfg(feature = "hardware-accel")]
@@ -360,87 +395,108 @@ impl NvdecDecoder {
     }
     
     fn handle_video_sequence(&mut self, video_format: *mut ffi::cuvid::CUVIDEOFORMAT) -> i32 {
-        unsafe {
-            let format = &*video_format;
-            
-            // Extract dimensions from the video format
-            let width = format.display_area.right - format.display_area.left;
-            let height = format.display_area.bottom - format.display_area.top;
-            
-            // Get codec name for better logging
-            let codec_name = match format.codec {
-                0 => "MPEG1",
-                1 => "MPEG2",
-                2 => "MPEG4",
-                3 => "VC1",
-                4 => "H264",
-                5 => "JPEG",
-                6 => "H264_SVC",
-                7 => "H264_MVC",
-                8 => "HEVC",
-                9 => "VP8",
-                10 => "VP9",
-                11 => "AV1",
-                _ => "Unknown",
-            };
-            
-            tracing::info!("Video sequence: {}x{}, codec: {} ({}), chroma_format: {}, bit_depth: {}", 
-                width, height, format.codec, codec_name, format.chroma_format, format.bit_depth_luma_minus8 + 8);
-            
-            // Update dimensions if they've changed
-            if self.width as i32 != width || self.height as i32 != height {
-                self.width = width as u32;
-                self.height = height as u32;
-                
-                // Recreate frame buffer with new dimensions
-                self.frame_buffer = Some(ImageBuffer::new(self.width, self.height));
-                tracing::info!("Updated dimensions to {}x{}", self.width, self.height);
-            }
-            
-            // Destroy existing decoder if it exists
-            if let Some(decoder) = self.decoder.take() {
-                tracing::info!("Destroying existing decoder");
+        tracing::info!("Processing video sequence");
+        
+        if video_format.is_null() {
+            tracing::error!("Null video_format pointer");
+            return 0;
+        }
+        
+        // Extract video format information
+        let format = unsafe { &*video_format };
+        
+        // Extract dimensions
+        let new_width = format.coded_width;
+        let new_height = format.coded_height;
+        
+        // Get codec information
+        let codec_type = format.codec;
+        let codec_name = match codec_type {
+            ffi::cuvid::cudaVideoCodec_HEVC => "HEVC",
+            // H264 constant not available in bindings
+            // ffi::cuvid::cudaVideoCodec_H264 => "H264",
+            _ => "Unknown",
+        };
+        
+        tracing::info!("Video sequence parameters: codec={}, dimensions={}x{}, chroma format={}, bit depth luma={}, chroma={}", 
+                  codec_name, new_width, new_height, format.chroma_format, 
+                  format.bit_depth_luma_minus8 + 8, format.bit_depth_chroma_minus8 + 8);
+        
+        // Check if dimensions have changed
+        let dimensions_changed = self.width != new_width || self.height != new_height;
+        if dimensions_changed {
+            tracing::info!("Video dimensions changed: {}x{} -> {}x{}", self.width, self.height, new_width, new_height);
+            self.width = new_width;
+            self.height = new_height;
+        }
+        
+        // Create or recreate the decoder if needed
+        let need_new_decoder = dimensions_changed || self.decoder.is_none();
+        
+        // If we need a new decoder, destroy the old one if it exists
+        if need_new_decoder && self.decoder.is_some() {
+            tracing::info!("Destroying existing decoder due to format change");
+            unsafe {
+                let decoder = self.decoder.unwrap();
                 ffi::cuvid::cuvidDestroyDecoder(decoder);
             }
-            
-            // Create new decoder with updated parameters
-            tracing::info!("Creating CUVID decoder for codec {}", codec_name);
-            let mut create_info: ffi::cuvid::CUVIDDECODECREATEINFO = mem::zeroed();
-            
-            // Use the codec from the format instead of hardcoding to HEVC
-            create_info.CodecType = format.codec;
-            create_info.ChromaFormat = format.chroma_format;
-            create_info.OutputFormat = ffi::cuvid::cudaVideoSurfaceFormat_NV12 as i32;
-            create_info.bitDepthMinus8 = format.bit_depth_luma_minus8 as u32;
-            create_info.DeinterlaceMode = ffi::cuvid::cudaVideoDeinterlaceMode_Weave as i32;
-            create_info.ulNumOutputSurfaces = 2;
-            create_info.ulNumDecodeSurfaces = 20;
-            create_info.ulWidth = format.coded_width;
-            create_info.ulHeight = format.coded_height;
-            create_info.ulTargetWidth = self.width as u32;
-            create_info.ulTargetHeight = self.height as u32;
-            create_info.target_rect.left = 0;
-            create_info.target_rect.top = 0;
-            create_info.target_rect.right = self.width as i16;
-            create_info.target_rect.bottom = self.height as i16;
-            create_info.display_area.left = format.display_area.left as i16;
-            create_info.display_area.top = format.display_area.top as i16;
-            create_info.display_area.right = format.display_area.right as i16;
-            create_info.display_area.bottom = format.display_area.bottom as i16;
-            create_info.vidLock = self.ctx_lock.unwrap() as ffi::cuvid::CUvideoctxlock;
-            
-            let mut decoder = ptr::null_mut();
-            let result = ffi::cuvid::cuvidCreateDecoder(&mut decoder, &mut create_info as *mut _);
-            if result != 0 {
-                tracing::error!("Failed to create CUVID decoder: error code {}", result);
-                return 0;
-            }
-            
-            self.decoder = Some(decoder);
-            tracing::info!("CUVID decoder created successfully");
-            
-            1 // Success
+            self.decoder = None;
         }
+        
+        // Create a new decoder if needed
+        if self.decoder.is_none() {
+            tracing::info!("Creating new CUVID decoder");
+            
+            // Create a new decoder
+            // Set up decoder create info
+            let mut create_info: ffi::cuvid::CUVIDDECODECREATEINFO = unsafe { std::mem::zeroed() };
+            
+            // Set codec type
+            create_info.CodecType = codec_type;
+            
+            // Set chroma format
+            create_info.ChromaFormat = format.chroma_format;
+            
+            // Set bit depth
+            create_info.bitDepthMinus8 = format.bit_depth_luma_minus8 as u32;
+            
+            // Set dimensions
+            create_info.ulWidth = new_width;
+            create_info.ulHeight = new_height;
+            
+            // Set display area
+            create_info.display_area.left = 0;
+            create_info.display_area.top = 0;
+            create_info.display_area.right = new_width as i16;
+            create_info.display_area.bottom = new_height as i16;
+            
+            // Set decode area
+            create_info.ulTargetWidth = new_width;
+            create_info.ulTargetHeight = new_height;
+            
+            // Set output format
+            create_info.OutputFormat = ffi::cuvid::cudaVideoSurfaceFormat_NV12 as i32;
+            
+            // Set deinterlace mode
+            create_info.DeinterlaceMode = ffi::cuvid::cudaVideoDeinterlaceMode_Weave as i32;
+            
+            // Create the decoder
+            let mut decoder: *mut std::os::raw::c_void = std::ptr::null_mut();
+            let result = unsafe {
+                ffi::cuvid::cuvidCreateDecoder(&mut decoder, &mut create_info)
+            };
+            
+            if result != 0 {
+                tracing::error!("Failed to create CUVID decoder: {}", result);
+                return 0;
+            } else {
+                tracing::info!("CUVID decoder created successfully");
+                self.decoder = Some(decoder);
+            }
+        }
+        
+        // Return success
+        1 // Success
     }
     
     fn handle_picture_decode(&mut self, pic_params: *mut ffi::cuvid::CUVIDPICPARAMS) -> i32 {
@@ -605,6 +661,10 @@ impl NvdecDecoder {
             
             // Store the decoded frame
             tracing::info!("Successfully processed decoded frame, adding to decoded_frames vector");
+            
+            // Save this as our last successfully decoded frame
+            self.frame_buffer = Some(frame_buffer.clone());
+            
             let mut decoded_frames = self.decoded_frames.lock().unwrap();
             decoded_frames.push(frame_buffer);
             
@@ -643,7 +703,7 @@ impl NvdecDecoder {
             // Default to H.264 which is more widely used, but will be updated when actual stream is parsed
             // This is mostly a hint, the actual codec will be determined from the bitstream
             parser_params.CodecType = ffi::cuvid::cudaVideoCodec_HEVC as i32;
-            tracing::info!("Starting with H.264 parser, actual codec will be detected from stream");
+            tracing::info!("Starting with HEVC parser, actual codec will be detected from stream");
             
             parser_params.ulMaxNumDecodeSurfaces = 20;
             parser_params.ulMaxDisplayDelay = 2; // Increase max display delay to help with frame ordering
@@ -718,129 +778,240 @@ impl NvdecDecoder {
     }
     
     pub fn decode_frame(&mut self, data: &[u8]) -> Result<Option<ImageBuffer<Rgba<u8>, Vec<u8>>>> {
-        // Initialize the decoder if it hasn't been initialized yet
+        // Initialize decoder if not already done
         if !self.initialized {
             self.initialize_decoder()?;
         }
         
         tracing::info!("Decoding frame of size: {} bytes", data.len());
         
-        // Analyze the frame structure
-        let nal_units = crate::parse_nal_units(data);
+        // Define a struct to hold NAL unit information
+        struct NalUnit {
+            pos: usize,
+            length: usize,
+        }
+        
+        // Look for NAL units in the data
+        let mut nal_units = Vec::new();
+        let mut pos = 0;
+        
+        while pos + 4 <= data.len() {
+            // Look for start code: 0x000001 or 0x00000001
+            let start_code_3 = pos + 2 < data.len() && 
+                              data[pos] == 0 && 
+                              data[pos + 1] == 0 && 
+                              data[pos + 2] == 1;
+                              
+            let start_code_4 = pos + 3 < data.len() && 
+                              data[pos] == 0 && 
+                              data[pos + 1] == 0 && 
+                              data[pos + 2] == 0 && 
+                              data[pos + 3] == 1;
+            
+            if start_code_3 || start_code_4 {
+                // Found start code, record NAL unit if we've seen a previous start code
+                let start_code_len = if start_code_3 { 3 } else { 4 };
+                
+                if !nal_units.is_empty() {
+                    let last_unit: &mut NalUnit = nal_units.last_mut().unwrap();
+                    last_unit.length = pos - last_unit.pos;
+                }
+                
+                // Record new NAL unit position (after start code)
+                nal_units.push(NalUnit {
+                    pos: pos + start_code_len,
+                    length: 0, // Will be filled later
+                });
+                
+                // Skip past start code
+                pos += start_code_len;
+            } else {
+                pos += 1;
+            }
+        }
+        
+        // Set length for the last NAL unit
+        if let Some(last_unit) = nal_units.last_mut() {
+            if last_unit.length == 0 {
+                last_unit.length = data.len() - last_unit.pos;
+            }
+        }
+        
         tracing::info!("Found {} NAL units in the frame", nal_units.len());
         
-        // Analyze NAL units for more information
-        let mut found_keyframe = false;
+        // Track if this is a keyframe
+        let mut is_keyframe = false;
+        let mut has_parameter_sets = false;
         
+        // Analyze NAL units for HEVC stream
         for (i, nal) in nal_units.iter().enumerate() {
-            if nal.len() < 2 {
-                continue;
-            }
-            
-            // Get NAL unit type (bits 1-6 of the first byte after the start code)
-            let nal_type = (nal[0] >> 1) & 0x3F;
-            tracing::info!("NAL unit {}: type={}, size={} bytes", i, nal_type, nal.len());
-            
-            // Print the first few bytes of each NAL unit
-            if nal.len() >= 8 {
-                tracing::info!("NAL unit {} header: {:02X?}", i, &nal[0..8]);
-            }
-            
-            // For HEVC, types 16-21 are various types of I-frames
-            if nal_type >= 16 && nal_type <= 21 {
-                found_keyframe = true;
-                tracing::info!("Found keyframe NAL unit (type {})", nal_type);
+            if nal.pos < data.len() && nal.length > 0 {
+                // Get NAL type for HEVC (bits 1-6 of the first byte after start code)
+                let nal_type = if nal.pos < data.len() {
+                    (data[nal.pos] >> 1) & 0x3F
+                } else {
+                    0
+                };
+                
+                // First few bytes of NAL for logging
+                let header_bytes = if nal.pos + 8 <= data.len() {
+                    &data[nal.pos..nal.pos + 8]
+                } else if nal.pos < data.len() {
+                    &data[nal.pos..data.len()]
+                } else {
+                    &[]
+                };
+                
+                tracing::info!("NAL unit {}: type={}, size={} bytes", i, nal_type, nal.length);
+                tracing::info!("NAL unit {} header: {:?}", i, header_bytes);
+                
+                // For HEVC: VPS=32, SPS=33, PPS=34, IDR=19-21
+                match nal_type {
+                    32 => { // VPS
+                        tracing::info!("Found VPS NAL unit");
+                        // Store VPS data for future use
+                        if nal.pos + nal.length <= data.len() {
+                            self.vps_data = Some(data[nal.pos..nal.pos + nal.length].to_vec());
+                        }
+                        is_keyframe = true;
+                        has_parameter_sets = true;
+                    },
+                    33 => { // SPS
+                        tracing::info!("Found SPS NAL unit");
+                        // Store SPS data for future use
+                        if nal.pos + nal.length <= data.len() {
+                            self.sps_data = Some(data[nal.pos..nal.pos + nal.length].to_vec());
+                        }
+                        is_keyframe = true;
+                        has_parameter_sets = true;
+                    },
+                    34 => { // PPS
+                        tracing::info!("Found PPS NAL unit");
+                        // Store PPS data for future use
+                        if nal.pos + nal.length <= data.len() {
+                            self.pps_data = Some(data[nal.pos..nal.pos + nal.length].to_vec());
+                        }
+                        is_keyframe = true;
+                        has_parameter_sets = true;
+                    },
+                    19 | 20 | 21 => { // IDR picture
+                        tracing::info!("Found keyframe NAL unit (type {})", nal_type);
+                        is_keyframe = true;
+                    },
+                    _ => {
+                        // Other NAL unit types
+                    }
+                }
             }
         }
         
-        if found_keyframe {
+        if is_keyframe {
             tracing::info!("This appears to be a keyframe");
-        }
-        
-        // Clear any previously decoded frames
-        {
-            let mut decoded_frames = self.decoded_frames.lock().unwrap();
-            decoded_frames.clear();
-        }
-        
-        // Feed the data to the parser
-        if let Some(parser) = self.parser {
-            unsafe {
-                let mut packet: ffi::cuvid::CUVIDSOURCEDATAPACKET = mem::zeroed();
-                packet.payload_size = data.len() as u32;
-                packet.payload = data.as_ptr();
-                packet.flags = 0;
-                packet.timestamp = self.frame_count as i64;
+            
+            // If we have a keyframe but no decoder yet, manually create a decoder with default parameters
+            if self.decoder.is_none() && !has_parameter_sets && self.frame_count == 0 {
+                tracing::info!("First keyframe but no parameter sets found. Manually creating decoder.");
                 
-                // Increment frame count
-                self.frame_count += 1;
-                
-                tracing::info!("Sending frame {} to parser", self.frame_count);
-                
-                // Print the first few bytes of the frame data for debugging
-                if data.len() >= 16 {
-                    let header = &data[0..16];
-                    tracing::info!("Frame header: {:02X?}", header);
-                }
-                
-                let result = ffi::cuvid::cuvidParseVideoData(parser, &mut packet as *mut _);
-                if result != 0 {
-                    let error_message = match result {
-                        1 => "Invalid arguments",
-                        2 => "Invalid device or handle",
-                        3 => "Invalid context",
-                        8 => "Invalid value",
-                        200 => "Parser not initialized",
-                        201 => "Invalid parameter",
-                        202 => "Invalid bitstream",
-                        _ => "Unknown error",
-                    };
+                // Create a default video format for HEVC
+                unsafe {
+                    let mut video_format: ffi::cuvid::CUVIDEOFORMAT = std::mem::zeroed();
                     
-                    tracing::error!("Failed to parse video data: error code {} ({})", result, error_message);
-                    return Err(anyhow!("Failed to parse video data: {} ({})", result, error_message));
+                    // Set it to HEVC with default parameters
+                    video_format.codec = ffi::cuvid::cudaVideoCodec_HEVC;
+                    video_format.coded_width = if self.width > 0 { self.width } else { 640 };
+                    video_format.coded_height = if self.height > 0 { self.height } else { 480 };
+                    // Use 0 which corresponds to 4:2:0 chroma format in NVIDIA docs
+                    video_format.chroma_format = 0; // 0 = 4:2:0 format (YUV 420)
+                    video_format.bit_depth_luma_minus8 = 0; // 8-bit
+                    video_format.bit_depth_chroma_minus8 = 0; // 8-bit
+                    
+                    // Manually call the sequence handler
+                    let result = self.handle_video_sequence(&mut video_format);
+                    tracing::info!("Manual sequence handler result: {}", result);
                 }
-                
+            }
+        }
+        
+        // Track frame number
+        self.frame_count += 1;
+        
+        // Feed data to parser
+        if let Some(parser) = self.parser {
+            tracing::info!("Sending frame {} to parser", self.frame_count);
+            
+            // Log first few bytes for debugging
+            let header_bytes = if data.len() >= 16 {
+                &data[..16]
+            } else {
+                data
+            };
+            tracing::info!("Frame header: {:?}", header_bytes);
+            
+            // Create packet for parser
+            let mut packet: ffi::cuvid::CUVIDSOURCEDATAPACKET = unsafe { std::mem::zeroed() };
+            packet.payload_size = data.len() as u32;
+            packet.payload = data.as_ptr();
+            packet.flags = 0;
+            if self.frame_count == 1 {
+                packet.flags |= ffi::cuvid::CUVID_PKT_ENDOFSTREAM as u32;
+            }
+            packet.timestamp = 0;
+            
+            let result = unsafe {
+                ffi::cuvid::cuvidParseVideoData(parser, &mut packet)
+            };
+            
+            if result != 0 {
+                tracing::error!("Failed to parse video data: {}", result);
+            } else {
                 tracing::info!("Successfully parsed video data");
             }
-        } else {
-            tracing::error!("Parser not initialized");
-            return Err(anyhow!("Parser not initialized"));
+            
+            // Check if we have decoded frames
+            let decoded_frames = {
+                #[cfg(feature = "hardware-accel")]
+                {
+                    let frames = self.decoded_frames.lock().unwrap();
+                    frames.len()
+                }
+                #[cfg(not(feature = "hardware-accel"))]
+                0
+            };
+            
+            tracing::info!("Number of decoded frames: {}", decoded_frames);
+            
+            if decoded_frames > 0 {
+                // Return the last decoded frame
+                #[cfg(feature = "hardware-accel")]
+                {
+                    let mut frames = self.decoded_frames.lock().unwrap();
+                    if !frames.is_empty() {
+                        return Ok(Some(frames.remove(0)));
+                    }
+                }
+            } else if self.decoder.is_none() {
+                tracing::error!("No decoder created yet, possibly missing sequence parameters");
+            }
         }
         
-        // Wait a bit for callbacks to complete
-        std::thread::sleep(std::time::Duration::from_millis(20));
-        
-        // Get the decoded frame
-        let mut decoded_frames = self.decoded_frames.lock().unwrap();
-        tracing::info!("Number of decoded frames: {}", decoded_frames.len());
-        
-        if !decoded_frames.is_empty() {
-            // Return the first decoded frame
-            tracing::info!("Returning decoded frame");
-            return Ok(Some(decoded_frames.remove(0)));
-        }
-        
-        // If no frames were decoded, check if we have a valid decoder and dimensions
-        if self.decoder.is_none() {
-            tracing::error!("No decoder created yet, possibly missing sequence parameters");
-        }
-        
-        // If no frames were decoded after multiple attempts, create a placeholder
-        // This should be rare - only for the first few frames before decoder is fully set up
+        // If we have dimensions but no frame, create a placeholder frame
         if self.width > 0 && self.height > 0 {
             tracing::warn!("Creating placeholder frame of size {}x{}", self.width, self.height);
             let mut buffer = ImageBuffer::new(self.width, self.height);
-            
-            // Fill with a solid color (gray)
+            // Fill with dark gray
             for pixel in buffer.pixels_mut() {
                 *pixel = Rgba([50, 50, 50, 255]);
+            }
+            
+            // If we have a buffer from a previous successful decode, use that instead
+            if let Some(frame_buffer) = &self.frame_buffer {
+                tracing::info!("Using last decoded frame as placeholder");
+                return Ok(Some(frame_buffer.clone()));
             }
             
             return Ok(Some(buffer));
         }
         
-        // If no frames were decoded, return None
-        tracing::warn!("No frames decoded and no dimensions available");
         Ok(None)
     }
 }
