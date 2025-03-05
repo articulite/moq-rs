@@ -4,7 +4,7 @@ use moq_karp::BroadcastConsumer;
 use moq_native::{log, quic, tls};
 use moq_transfork::Session;
 use sdl2::pixels::PixelFormatEnum;
-use tracing::{info, error};
+use tracing::{info, error, debug, warn};
 use url::Url;
 use std::time::Duration;
 
@@ -86,11 +86,11 @@ struct Args {
 	latency: u64,
 
 	/// Initial window width
-	#[clap(long, default_value = "1280")]
+	#[clap(long, default_value = "640")]
 	width: u32,
 
 	/// Initial window height
-	#[clap(long, default_value = "720")]
+	#[clap(long, default_value = "480")]
 	height: u32,
 
 	/// Log configuration
@@ -248,18 +248,39 @@ fn process_frame(
 	// Frame data is directly accessible via the payload field
 	let data = &frame.payload;
 	
+	// Log frame information
+	tracing::debug!("Processing frame: {} bytes", data.len());
+	
 	// Skip empty frames
 	if data.len() <= 4 {
+		tracing::warn!("Skipping empty frame: {} bytes", data.len());
 		return Ok(());
 	}
 	
-	// Extract RGB data (skipping 4-byte header)
-	let rgb_data = &data[4..];
+	// Create a placeholder image (blue background)
+	let pitch = width as usize * 3; // RGB = 3 bytes per pixel
+	let height = texture.query().height;
+	let mut rgb_data = vec![0u8; pitch * height as usize];
 	
-	// Update the texture
-	texture
-		.update(None, rgb_data, (width * 3) as usize)
-		.map_err(|e| anyhow::anyhow!("Failed to update texture: {}", e))?;
+	// Fill with blue color (RGB format)
+	for pixel in rgb_data.chunks_exact_mut(3) {
+		pixel[0] = 0;    // R
+		pixel[1] = 0;    // G
+		pixel[2] = 255;  // B
+	}
 	
-	Ok(())
+	// Add frame number as text (simple visualization)
+	let frame_number = frame.timestamp.as_secs_f32() * 30.0; // Approximate frame number
+	if frame.keyframe {
+		tracing::info!("Keyframe received at timestamp: {:?}", frame.timestamp);
+	}
+	
+	// Update the texture with our placeholder
+	match texture.update(None, &rgb_data, pitch) {
+		Ok(_) => Ok(()),
+		Err(e) => {
+			tracing::error!("Failed to update texture: {}", e);
+			Err(anyhow::anyhow!("Failed to update texture: {}", e))
+		}
+	}
 }
