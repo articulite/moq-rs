@@ -7,6 +7,8 @@ use sdl2::pixels::PixelFormatEnum;
 use tracing::{info, error, debug, warn};
 use url::Url;
 use std::time::Duration;
+use moq_x265::X265Decoder;
+use std::sync::Mutex;
 
 /// MoQ Receiver - A simple application to receive and display MoQ video streams
 #[derive(Parser, Clone, Default)]
@@ -100,6 +102,11 @@ struct Args {
 	/// TLS configuration
 	#[clap(flatten)]
 	tls: TlsArgs,
+}
+
+// Create a static decoder that persists between frames
+lazy_static::lazy_static! {
+	static ref DECODER: Mutex<X265Decoder> = Mutex::new(X265Decoder::new());
 }
 
 #[tokio::main]
@@ -257,30 +264,75 @@ fn process_frame(
 		return Ok(());
 	}
 	
-	// Create a placeholder image (blue background)
-	let pitch = width as usize * 3; // RGB = 3 bytes per pixel
-	let height = texture.query().height;
-	let mut rgb_data = vec![0u8; pitch * height as usize];
-	
-	// Fill with blue color (RGB format)
-	for pixel in rgb_data.chunks_exact_mut(3) {
-		pixel[0] = 0;    // R
-		pixel[1] = 0;    // G
-		pixel[2] = 255;  // B
-	}
-	
-	// Add frame number as text (simple visualization)
-	let frame_number = frame.timestamp.as_secs_f32() * 30.0; // Approximate frame number
-	if frame.keyframe {
-		tracing::info!("Keyframe received at timestamp: {:?}", frame.timestamp);
-	}
-	
-	// Update the texture with our placeholder
-	match texture.update(None, &rgb_data, pitch) {
-		Ok(_) => Ok(()),
+	// Try to decode the frame using our x265 decoder
+	let mut decoder = DECODER.lock().unwrap();
+	match decoder.decode_frame(data) {
+		Ok(Some(image)) => {
+			// Convert the image to RGB format for SDL
+			let pitch = width as usize * 3; // RGB = 3 bytes per pixel
+			let height = texture.query().height;
+			let mut rgb_data = vec![0u8; pitch * height as usize];
+			
+			// Copy the image data to the RGB buffer
+			for y in 0..height {
+				for x in 0..width {
+					if x < image.width() && y < image.height() {
+						let pixel = image.get_pixel(x, y);
+						let offset = (y as usize * pitch) + (x as usize * 3);
+						if offset + 2 < rgb_data.len() {
+							rgb_data[offset] = pixel[0];     // R
+							rgb_data[offset + 1] = pixel[1]; // G
+							rgb_data[offset + 2] = pixel[2]; // B
+						}
+					}
+				}
+			}
+			
+			// Update the texture with the decoded image
+			match texture.update(None, &rgb_data, pitch) {
+				Ok(_) => {
+					if frame.keyframe {
+						tracing::info!("Keyframe decoded at timestamp: {:?}", frame.timestamp);
+					}
+					Ok(())
+				},
+				Err(e) => {
+					tracing::error!("Failed to update texture: {}", e);
+					Err(anyhow::anyhow!("Failed to update texture: {}", e))
+				}
+			}
+		},
+		Ok(None) => {
+			// If decoding failed or no frame was produced, show a blue screen as fallback
+			let pitch = width as usize * 3; // RGB = 3 bytes per pixel
+			let height = texture.query().height;
+			let mut rgb_data = vec![0u8; pitch * height as usize];
+			
+			// Fill with blue color (RGB format)
+			for pixel in rgb_data.chunks_exact_mut(3) {
+				pixel[0] = 0;    // R
+				pixel[1] = 0;    // G
+				pixel[2] = 255;  // B
+			}
+			
+			// Add frame number as text (simple visualization)
+			let frame_number = frame.timestamp.as_secs_f32() * 30.0; // Approximate frame number
+			if frame.keyframe {
+				tracing::info!("Keyframe received but not decoded at timestamp: {:?}", frame.timestamp);
+			}
+			
+			// Update the texture with our placeholder
+			match texture.update(None, &rgb_data, pitch) {
+				Ok(_) => Ok(()),
+				Err(e) => {
+					tracing::error!("Failed to update texture: {}", e);
+					Err(anyhow::anyhow!("Failed to update texture: {}", e))
+				}
+			}
+		},
 		Err(e) => {
-			tracing::error!("Failed to update texture: {}", e);
-			Err(anyhow::anyhow!("Failed to update texture: {}", e))
+			tracing::error!("Failed to decode frame: {}", e);
+			Err(anyhow::anyhow!("Failed to decode frame: {}", e))
 		}
 	}
 }

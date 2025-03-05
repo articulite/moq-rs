@@ -17,6 +17,7 @@ image = "0.24"
 moq-native = { path = "../moq-native" }
 moq-transfork = { path = "../moq-transfork" }
 moq-karp = { path = "../moq-karp" }
+moq-x265 = { path = "../moq-x265" }
 # x264 = "=0.4.0"  # Removing x264 dependency
 # Adding Windows Media Foundation dependencies
 windows = { version = "0.60.0", features = ["Media_MediaProperties", "Media_Devices", "Media_Core", "Media_Capture", "Media_Transcoding", "Foundation", "Storage", "Storage_Streams", "Win32_Media_MediaFoundation"] }

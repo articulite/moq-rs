@@ -6,6 +6,7 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use tracing::info;
 use url::Url;
+use crate::hevc_encoder::{init_x265, shutdown_x265};
 
 // Create a wrapper struct for moq_native::log::Args to implement Debug
 #[derive(Parser, Debug)]
@@ -150,6 +151,9 @@ async fn main() -> Result<()> {
         args.fps,
     )?;
     
+    // Initialize x265
+    init_x265()?;
+    
     info!("Started streaming. Press Ctrl+C to stop.");
     
     // Main capture and encoding loop
@@ -163,4 +167,9 @@ async fn main() -> Result<()> {
         // Publish frame
         publisher.publish_frame(encoded).await?;
     }
+    
+    // Cleanup
+    shutdown_x265()?;
+    
+    Ok(())
 } 

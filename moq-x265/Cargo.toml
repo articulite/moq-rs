@@ -1,0 +1,19 @@
+[package]
+name = "moq-x265"
+version = "0.1.0"
+edition = "2021"
+description = "Rust bindings for x265 HEVC encoder/decoder"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+anyhow = "1.0"
+libc = "0.2"
+thiserror = "1.0"
+bytes = "1.0"
+image = "0.24"
+tracing = "0.1"
+
+[build-dependencies]
+bindgen = "0.69"
+cc = "1.0"
+pkg-config = "0.3" 

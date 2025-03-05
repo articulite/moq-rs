@@ -18,6 +18,9 @@ The project is split into a few crates:
 - [moq-karp](moq-karp): The underlying media protocol powered by moq-transfork. It includes a CLI for importing/exporting to other formats, for example integrating with ffmpeg.
 -   [moq-clock](moq-clock): A dumb clock client/server just to prove MoQ can be used for more than media.
 -   [moq-native](moq-native): Helpers to configure the native MoQ tools.
+-   [moq-streamer](moq-streamer): A desktop application that captures the screen and streams it using HEVC encoding.
+-   [moq-receiver](moq-receiver): A desktop application that receives and displays video streams.
+-   [moq-x265](moq-x265): Rust bindings for the x265 HEVC encoder/decoder library.
 
 
 
@@ -26,6 +29,7 @@ The project is split into a few crates:
 - [Rustup](https://www.rust-lang.org/tools/install)
 - [Just](https://github.com/casey/just?tab=readme-ov-file#installation)
 - [Node + NPM](https://nodejs.org/)
+- [x265](https://www.videolan.org/developers/x265.html) (for HEVC encoding/decoding)
 
 ## Setup
 We use `just` to simplify the development process.
@@ -34,6 +38,35 @@ Check out the [Justfile](justfile) or run `just` to see the available commands.
 Install any other required tools:
 ```sh
 just setup
+```
+
+### x265 Setup
+For the HEVC encoding/decoding functionality, you need to install the x265 library:
+
+#### Windows
+Run the provided setup script:
+```powershell
+cd moq-x265
+.\setup-x265.ps1
+```
+
+#### Linux
+Install using your package manager:
+```sh
+# Ubuntu/Debian
+sudo apt-get install libx265-dev
+
+# Fedora
+sudo dnf install libx265-devel
+
+# Arch Linux
+sudo pacman -S x265
+```
+
+#### macOS
+Install using Homebrew:
+```sh
+brew install x265
 ```
 
 ## Development
@@ -83,9 +116,19 @@ For example:
 
 See the [moq-web README](moq-web/README.md) for more information.
 
+## moq-streamer
+
+[moq-streamer](moq-streamer) is a desktop application that captures the screen and streams it to a MoQ relay server using HEVC encoding. It uses the x265 library for high-quality, efficient video encoding.
+
+```bash
+# Build and run the streamer
+cd moq-streamer
+cargo run -- --server https://localhost:4443 --name desktop
+```
+
 ## moq-receiver
 
-[moq-receiver](moq-receiver) is a desktop application that can connect to a MoQ relay server and display video streams. It uses SDL2 for rendering and window management.
+[moq-receiver](moq-receiver) is a desktop application that can connect to a MoQ relay server and display video streams. It uses SDL2 for rendering and window management, and the x265 library for HEVC decoding.
 
 ```bash
 # Build and run the receiver
@@ -94,6 +137,12 @@ cargo run -- --server https://localhost:4443 --name desktop
 ```
 
 See the [moq-receiver README](moq-receiver/README.md) for more information on setup and usage, including SDL2 installation instructions.
+
+## moq-x265
+
+[moq-x265](moq-x265) provides Rust bindings for the x265 HEVC encoder/decoder library. It's used by both moq-streamer and moq-receiver for efficient video encoding and decoding.
+
+See the [moq-x265 README](moq-x265/README.md) for more information on setup and usage.
 
 ## moq-karp
 
