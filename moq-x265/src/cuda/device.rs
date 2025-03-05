@@ -1,11 +1,12 @@
 use std::os::raw::c_int;
 use anyhow::{anyhow, Result};
 
-use ffi::cuda::{CUdevice, CUresult};
+#[cfg(feature = "hardware-accel")]
+use nvidia_video_codec_sys as ffi;
 
 // Simple wrapper for CUDA device
 pub struct CuDevice {
-    device: CUdevice,
+    device: c_int,
 }
 
 // Macro for handling CUDA errors
@@ -27,10 +28,6 @@ impl CuDevice {
         cuda_check!(ffi::cuda::cuDeviceGet(&mut device, ordinal));
         Ok(Self { device })
     }
-    
-    pub fn device(&self) -> CUdevice {
-        self.device
-    }
 }
 
 // Get the number of available CUDA devices
@@ -43,7 +40,7 @@ pub fn get_count() -> Result<i32> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn device_enum() {
         // Initialize CUDA
@@ -59,4 +56,4 @@ mod tests {
             assert!(device.device >= 0);
         }
     }
-}
+} 

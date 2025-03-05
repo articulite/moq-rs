@@ -8,4 +8,18 @@ macro_rules! wrap {
     )
 }
 
+// Simplified macros for error handling
+#[macro_export]
+macro_rules! cuda_check {
+    ($expr:expr) => {
+        {
+            let result = unsafe { $expr };
+            if result != 0 {
+                return Err(anyhow::anyhow!("CUDA error: {}", result));
+            }
+            result
+        }
+    };
+}
+
 

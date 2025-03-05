@@ -11,4 +11,5 @@ edition = "2021"
 
 [dependencies]
 nvidia-video-codec-sys = { version = "0.1.0", path = "nvidia-video-codec-sys" }
+anyhow = "1.0"
 

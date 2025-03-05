@@ -26,6 +26,16 @@ $nvLibPath = Join-Path $env:NVIDIA_VIDEO_CODEC_SDK_DIR "Lib\x64"
 $env:PATH = "$nvLibPath;$env:PATH"
 Write-Host "Added $nvLibPath to PATH" -ForegroundColor Green
 
+# Add CUDA Toolkit bin directory to PATH
+$cudaBinPath = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\bin"
+if (Test-Path $cudaBinPath) {
+    $env:PATH = "$cudaBinPath;$env:PATH"
+    Write-Host "Added CUDA Toolkit bin directory to PATH: $cudaBinPath" -ForegroundColor Green
+} else {
+    Write-Host "CUDA Toolkit bin directory not found at $cudaBinPath" -ForegroundColor Yellow
+    Write-Host "Please make sure CUDA Toolkit is installed" -ForegroundColor Yellow
+}
+
 # Build with hardware acceleration
 Write-Host "Building moq-x265 with hardware acceleration..." -ForegroundColor Cyan
 cargo build --features hardware-accel

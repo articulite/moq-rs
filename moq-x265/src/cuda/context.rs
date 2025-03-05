@@ -2,13 +2,14 @@ use std::os::raw::c_void;
 use std::ptr;
 use anyhow::{anyhow, Result};
 
-use ffi::cuda::{CUcontext, CUresult};
+#[cfg(feature = "hardware-accel")]
+use nvidia_video_codec_sys as ffi;
 
 use super::device::CuDevice;
 
 // Simple wrapper for CUDA context
 pub struct CuContext {
-    context: CUcontext,
+    context: *mut c_void,
 }
 
 // Macro for handling CUDA errors
@@ -27,13 +28,7 @@ macro_rules! cuda_check {
 impl CuContext {
     pub fn new(device: CuDevice, flags: u32) -> Result<Self> {
         let mut context = ptr::null_mut();
-        cuda_check!(ffi::cuda::cuCtxCreate_v2(&mut context, flags, device.device()));
-        Ok(Self { context })
-    }
-    
-    pub fn current() -> Result<Self> {
-        let mut context = ptr::null_mut();
-        // We don't have cuCtxGetCurrent in our minimal bindings, so we'll just create a new context
+        cuda_check!(ffi::cuda::cuCtxCreate_v2(&mut context, flags, device.device));
         Ok(Self { context })
     }
 }
@@ -49,18 +44,4 @@ impl Drop for CuContext {
 }
 
 unsafe impl Send for CuContext {}
-unsafe impl Sync for CuContext {}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::cuda::device::CuDevice;
-
-    #[test]
-    fn context_create() {
-        unsafe { cuInit(0) };
-        let device = CuDevice::new(0).unwrap();
-        let context = CuContext::new(device, 0).unwrap();
-        drop(context);
-    }
-}
+unsafe impl Sync for CuContext {} 

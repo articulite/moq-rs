@@ -1,6 +1,6 @@
 use anyhow::Result;
 use image::{ImageBuffer, Rgba};
-use moq_x265::{create_hardware_encoder, create_hardware_decoder};
+use moq_x265::{create_hardware_encoder, create_hardware_decoder, Encoder, Decoder};
 use std::time::{Instant, Duration};
 use std::fs::File;
 use std::io::Write;
@@ -51,7 +51,7 @@ fn main() -> Result<()> {
         
         // Encode frame
         let start = Instant::now();
-        let encoded = encoder.encode_frame(&frame)?;
+        let encoded = encoder.encode(&frame)?;
         let duration = start.elapsed();
         
         total_encoding_time += duration;
@@ -60,10 +60,10 @@ fn main() -> Result<()> {
         // Write encoded frame to file
         encoded_file.write_all(&encoded.data)?;
         
+        println!("Frame {}: Encoded {} bytes in {:?}", i, encoded.data.len(), duration);
+        
         // Save encoded frame for decoding
         encoded_frames.push(encoded);
-        
-        println!("Frame {}: Encoded {} bytes in {:?}", i, encoded.data.len(), duration);
     }
     
     // Calculate encoding statistics
@@ -88,7 +88,7 @@ fn main() -> Result<()> {
     for (i, encoded) in encoded_frames.iter().enumerate() {
         // Decode frame
         let start = Instant::now();
-        let decoded = decoder.decode_frame(&encoded.data)?;
+        let decoded = decoder.decode(&encoded.data)?;
         let duration = start.elapsed();
         
         total_decoding_time += duration;

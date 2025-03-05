@@ -34,10 +34,20 @@ pub enum X265Error {
     HardwareAccelerationNotAvailable(String),
 }
 
+// Define traits for encoders and decoders
+pub trait Encoder {
+    fn encode(&mut self, frame: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<EncodedFrame>;
+}
+
+pub trait Decoder {
+    fn decode(&mut self, data: &[u8]) -> Result<Option<ImageBuffer<Rgba<u8>, Vec<u8>>>>;
+}
+
 // Feature flag for hardware acceleration
 #[cfg(feature = "hardware-accel")]
 pub use nvidia::{NvencEncoder as HardwareEncoder, NvdecDecoder as HardwareDecoder};
 
+#[derive(Clone, Debug)]
 pub struct EncodedFrame {
     pub data: Vec<u8>,
     pub timestamp: Duration,
@@ -568,67 +578,73 @@ fn rgba_to_i420_buffer(
 
 // Hardware acceleration support
 #[cfg(feature = "hardware-accel")]
-pub struct HardwareEncoder {
-    encoder: nvidia::NvencEncoder,
-}
+pub use nvidia::{NvencEncoder, NvdecDecoder, is_nvidia_hardware_available};
 
-#[cfg(feature = "hardware-accel")]
-impl HardwareEncoder {
-    pub fn new(width: u32, height: u32, bitrate: u32, fps: u32, keyframe_interval: u32) -> Result<Self> {
-        let encoder = nvidia::create_hardware_encoder(width, height, bitrate, fps, keyframe_interval)?;
-        Ok(Self { encoder })
+/// Check if hardware acceleration is available
+pub fn is_hardware_acceleration_available() -> bool {
+    #[cfg(feature = "hardware-accel")]
+    {
+        nvidia::is_nvidia_hardware_available()
     }
     
-    pub fn encode_frame(&mut self, frame: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<EncodedFrame> {
-        self.encoder.encode_frame(frame)
+    #[cfg(not(feature = "hardware-accel"))]
+    {
+        false
     }
 }
 
-#[cfg(feature = "hardware-accel")]
-pub struct HardwareDecoder {
-    decoder: nvidia::NvdecDecoder,
-}
-
-#[cfg(feature = "hardware-accel")]
-impl HardwareDecoder {
-    pub fn new() -> Result<Self> {
-        let decoder = nvidia::create_hardware_decoder()?;
-        Ok(Self { decoder })
+/// Create a hardware encoder if available
+pub fn create_hardware_encoder(width: u32, height: u32, bitrate: u32, fps: u32, keyframe_interval: u32) -> Result<Box<dyn Encoder>> {
+    #[cfg(feature = "hardware-accel")]
+    {
+        if is_hardware_acceleration_available() {
+            let encoder = nvidia::create_hardware_encoder(width, height, bitrate, fps, keyframe_interval)?;
+            return Ok(Box::new(encoder));
+        }
     }
     
-    pub fn decode_frame(&mut self, data: &[u8]) -> Result<Option<ImageBuffer<Rgba<u8>, Vec<u8>>>> {
-        self.decoder.decode_frame(data)
+    Err(anyhow!("Hardware acceleration is not available"))
+}
+
+/// Create a hardware decoder if available
+pub fn create_hardware_decoder() -> Result<Box<dyn Decoder>> {
+    #[cfg(feature = "hardware-accel")]
+    {
+        if is_hardware_acceleration_available() {
+            let decoder = nvidia::create_hardware_decoder()?;
+            return Ok(Box::new(decoder));
+        }
+    }
+    
+    Err(anyhow!("Hardware acceleration is not available"))
+}
+
+// Implement Encoder trait for NvencEncoder
+#[cfg(feature = "hardware-accel")]
+impl Encoder for NvencEncoder {
+    fn encode(&mut self, frame: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<EncodedFrame> {
+        self.encode_frame(frame)
     }
 }
 
-// Check if hardware acceleration is available
+// Implement Decoder trait for NvdecDecoder
 #[cfg(feature = "hardware-accel")]
-pub fn is_hardware_acceleration_available() -> bool {
-    nvidia::is_nvidia_hardware_available()
+impl Decoder for NvdecDecoder {
+    fn decode(&mut self, data: &[u8]) -> Result<Option<ImageBuffer<Rgba<u8>, Vec<u8>>>> {
+        self.decode_frame(data)
+    }
 }
 
-#[cfg(not(feature = "hardware-accel"))]
-pub fn is_hardware_acceleration_available() -> bool {
-    false
+// Implement Encoder trait for X265Encoder
+impl Encoder for X265Encoder {
+    fn encode(&mut self, frame: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<EncodedFrame> {
+        self.encode_frame(frame)
+    }
 }
 
-// Convenience functions for creating hardware encoders and decoders
-#[cfg(feature = "hardware-accel")]
-pub fn create_hardware_encoder(width: u32, height: u32, bitrate: u32, fps: u32, keyframe_interval: u32) -> Result<HardwareEncoder> {
-    nvidia::create_hardware_encoder(width, height, bitrate, fps, keyframe_interval)
-}
-
-#[cfg(not(feature = "hardware-accel"))]
-pub fn create_hardware_encoder(_width: u32, _height: u32, _bitrate: u32, _fps: u32, _keyframe_interval: u32) -> Result<X265Encoder> {
-    Err(anyhow!("Hardware acceleration is not enabled. Recompile with --features hardware-accel"))
-}
-
-#[cfg(feature = "hardware-accel")]
-pub fn create_hardware_decoder() -> Result<HardwareDecoder> {
-    nvidia::create_hardware_decoder()
-}
-
-#[cfg(not(feature = "hardware-accel"))]
-pub fn create_hardware_decoder() -> Result<X265Decoder> {
-    Err(anyhow!("Hardware acceleration is not enabled. Recompile with --features hardware-accel"))
+// Implement Decoder trait for X265Decoder
+impl Decoder for X265Decoder {
+    fn decode(&mut self, data: &[u8]) -> Result<Option<ImageBuffer<Rgba<u8>, Vec<u8>>>> {
+        self.decode_frame(data)
+    }
 } 

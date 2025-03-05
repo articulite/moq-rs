@@ -54,9 +54,18 @@ fn main() {
     
     // Set library names based on OS
     if is_windows {
-        // On Windows, we don't need to link to these libraries directly
-        // They will be loaded dynamically at runtime
-        println!("cargo:warning=Windows build: Libraries will be loaded dynamically");
+        // On Windows, we need to link to the CUDA libraries
+        println!("cargo:rustc-link-search=native={}\\Lib\\x64", sdk_path.display());
+        
+        // Add CUDA Toolkit path for Windows
+        let cuda_toolkit_path = "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.8\\lib\\x64";
+        println!("cargo:rustc-link-search=native={}", cuda_toolkit_path);
+        println!("cargo:warning=Using CUDA Toolkit from: {}", cuda_toolkit_path);
+        
+        println!("cargo:rustc-link-lib=dylib=cuda");
+        println!("cargo:rustc-link-lib=dylib=nvcuvid");
+        println!("cargo:rustc-link-lib=dylib=nvencodeapi");
+        println!("cargo:warning=Windows build: Linking to NVIDIA libraries from {}", sdk_path.display());
     } else {
         println!("cargo:rustc-link-lib=dylib={}", "cuda");
         println!("cargo:rustc-link-lib=dylib={}", "nvcuvid");
