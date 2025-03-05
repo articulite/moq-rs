@@ -1335,6 +1335,7 @@ dependencies = [
  "image",
  "lazy_static",
  "libc",
+ "nvidia-video-codec",
  "pkg-config",
  "thiserror 1.0.69",
  "tracing",
@@ -1473,6 +1474,21 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "nvidia-video-codec"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "nvidia-video-codec-sys",
+]
+
+[[package]]
+name = "nvidia-video-codec-sys"
+version = "0.1.0"
+dependencies = [
+ "bindgen",
 ]
 
 [[package]]

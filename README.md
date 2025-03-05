@@ -18,9 +18,9 @@ The project is split into a few crates:
 - [moq-karp](moq-karp): The underlying media protocol powered by moq-transfork. It includes a CLI for importing/exporting to other formats, for example integrating with ffmpeg.
 -   [moq-clock](moq-clock): A dumb clock client/server just to prove MoQ can be used for more than media.
 -   [moq-native](moq-native): Helpers to configure the native MoQ tools.
--   [moq-streamer](moq-streamer): A desktop application that captures the screen and streams it using HEVC encoding.
--   [moq-receiver](moq-receiver): A desktop application that receives and displays video streams.
--   [moq-x265](moq-x265): Rust bindings for the x265 HEVC encoder/decoder library.
+-   [moq-streamer](moq-streamer): A desktop application that captures the screen and streams it using HEVC encoding. Supports hardware acceleration with NVIDIA GPUs.
+-   [moq-receiver](moq-receiver): A desktop application that receives and displays video streams. Supports hardware acceleration with NVIDIA GPUs.
+-   [moq-x265](moq-x265): Rust bindings for the x265 HEVC encoder/decoder library. Includes support for NVIDIA hardware acceleration.
 
 
 
@@ -30,6 +30,7 @@ The project is split into a few crates:
 - [Just](https://github.com/casey/just?tab=readme-ov-file#installation)
 - [Node + NPM](https://nodejs.org/)
 - [x265](https://www.videolan.org/developers/x265.html) (for HEVC encoding/decoding)
+- [NVIDIA Video Codec SDK](https://developer.nvidia.com/nvidia-video-codec-sdk) (optional, for hardware acceleration)
 
 ## Setup
 We use `just` to simplify the development process.
@@ -68,6 +69,9 @@ Install using Homebrew:
 ```sh
 brew install x265
 ```
+
+### Hardware Acceleration Setup (Optional)
+For NVIDIA hardware acceleration, follow the instructions in [HARDWARE_ACCELERATION.md](HARDWARE_ACCELERATION.md).
 
 ## Development
 
@@ -118,21 +122,29 @@ See the [moq-web README](moq-web/README.md) for more information.
 
 ## moq-streamer
 
-[moq-streamer](moq-streamer) is a desktop application that captures the screen and streams it to a MoQ relay server using HEVC encoding. It uses the x265 library for high-quality, efficient video encoding.
+[moq-streamer](moq-streamer) is a desktop application that captures the screen and streams it to a MoQ relay server using HEVC encoding. It uses the x265 library for high-quality, efficient video encoding and supports NVIDIA hardware acceleration for improved performance.
 
 ```bash
 # Build and run the streamer
 cd moq-streamer
 cargo run -- --server https://localhost:4443 --name desktop
+
+# With hardware acceleration (Windows)
+.\setup-nvidia.ps1
+cargo run -- --server https://localhost:4443 --name desktop
 ```
 
 ## moq-receiver
 
-[moq-receiver](moq-receiver) is a desktop application that can connect to a MoQ relay server and display video streams. It uses SDL2 for rendering and window management, and the x265 library for HEVC decoding.
+[moq-receiver](moq-receiver) is a desktop application that can connect to a MoQ relay server and display video streams. It uses SDL2 for rendering and window management, and the x265 library for HEVC decoding. It also supports NVIDIA hardware acceleration for improved performance.
 
 ```bash
 # Build and run the receiver
 cd moq-receiver
+cargo run -- --server https://localhost:4443 --name desktop
+
+# With hardware acceleration (Windows)
+.\setup-nvidia.ps1
 cargo run -- --server https://localhost:4443 --name desktop
 ```
 
@@ -140,7 +152,14 @@ See the [moq-receiver README](moq-receiver/README.md) for more information on se
 
 ## moq-x265
 
-[moq-x265](moq-x265) provides Rust bindings for the x265 HEVC encoder/decoder library. It's used by both moq-streamer and moq-receiver for efficient video encoding and decoding.
+[moq-x265](moq-x265) provides Rust bindings for the x265 HEVC encoder/decoder library. It's used by both moq-streamer and moq-receiver for efficient video encoding and decoding. It also includes support for NVIDIA hardware acceleration through the NVENC and NVDEC APIs.
+
+```bash
+# Test hardware acceleration
+cd moq-x265
+.\setup-nvidia.ps1
+cargo run --example test_nvidia
+```
 
 See the [moq-x265 README](moq-x265/README.md) for more information on setup and usage.
 
@@ -199,6 +218,7 @@ This repository contains a Media over QUIC (MoQ) implementation for streaming vi
 - x265 library (included in the repository)
 - SDL2 library (included in the repository)
 - FFmpeg (for MP4 container creation)
+- NVIDIA GPU with NVENC/NVDEC support (optional, for hardware acceleration)
 
 ## Getting Started
 
@@ -237,6 +257,22 @@ If you prefer to run components individually:
 ```powershell
 .\start-receiver.ps1
 ```
+
+### Hardware Acceleration
+
+For improved performance with NVIDIA GPUs, use the hardware acceleration setup scripts:
+
+```powershell
+# For the streamer
+cd moq-streamer
+.\setup-nvidia.ps1
+
+# For the receiver
+cd moq-receiver
+.\setup-nvidia.ps1
+```
+
+See [HARDWARE_ACCELERATION.md](HARDWARE_ACCELERATION.md) for detailed instructions.
 
 ## Configuration
 

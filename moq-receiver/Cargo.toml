@@ -12,7 +12,7 @@ url = "2.3"
 moq-native = { path = "../moq-native" }
 moq-transfork = { path = "../moq-transfork" }
 moq-karp = { path = "../moq-karp" }
-moq-x265 = { path = "../moq-x265" }
+moq-x265 = { path = "../moq-x265", features = ["hardware-accel"] }
 image = "0.24"
 sdl2 = "0.35"
 lazy_static = "1.4"

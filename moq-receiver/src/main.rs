@@ -7,7 +7,7 @@ use sdl2::pixels::PixelFormatEnum;
 use tracing::{info, error, debug, warn};
 use url::Url;
 use std::time::Duration;
-use moq_x265::X265Decoder;
+use moq_x265::{X265Decoder, Decoder};
 use std::sync::Mutex;
 
 /// MoQ Receiver - A simple application to receive and display MoQ video streams
@@ -106,7 +106,24 @@ struct Args {
 
 // Create a static decoder that persists between frames
 lazy_static::lazy_static! {
-	static ref DECODER: Mutex<X265Decoder> = Mutex::new(X265Decoder::new());
+	static ref DECODER: Mutex<Box<dyn Decoder>> = {
+		// Try to create a hardware decoder first
+		if moq_x265::is_hardware_acceleration_available() {
+			match moq_x265::create_hardware_decoder() {
+				Ok(hw_decoder) => {
+					info!("Using NVIDIA hardware decoder");
+					Mutex::new(hw_decoder)
+				},
+				Err(e) => {
+					warn!("Failed to create hardware decoder: {}, falling back to software", e);
+					Mutex::new(Box::new(X265Decoder::new()))
+				}
+			}
+		} else {
+			info!("Hardware acceleration not available, using software decoder");
+			Mutex::new(Box::new(X265Decoder::new()))
+		}
+	};
 }
 
 #[tokio::main]
@@ -266,7 +283,7 @@ fn process_frame(
 	
 	// Try to decode the frame using our x265 decoder
 	let mut decoder = DECODER.lock().unwrap();
-	match decoder.decode_frame(data) {
+	match decoder.decode(data) {
 		Ok(Some(image)) => {
 			// Convert the image to RGB format for SDL
 			let pitch = width as usize * 3; // RGB = 3 bytes per pixel

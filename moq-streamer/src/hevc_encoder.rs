@@ -1,6 +1,6 @@
 use anyhow::Result;
 use image::{ImageBuffer, Rgba};
-use moq_x265::{X265Encoder, EncodedFrame};
+use moq_x265::{X265Encoder, EncodedFrame, Encoder};
 
 // Initialize x265
 pub fn init_x265() -> Result<()> {
@@ -19,7 +19,8 @@ pub struct HEVCEncoder {
     height: u32,
     bitrate: u32,
     fps: u32,
-    encoder: X265Encoder,
+    encoder: Box<dyn Encoder>,
+    using_hardware: bool,
 }
 
 impl HEVCEncoder {
@@ -27,8 +28,24 @@ impl HEVCEncoder {
         // Use a shorter keyframe interval (1 second) for better compatibility
         let keyframe_interval = fps;
         
-        // Create encoder with default settings
-        let encoder = X265Encoder::new(width, height, bitrate, fps, keyframe_interval)?;
+        // Try to create a hardware encoder first
+        let (encoder, using_hardware) = if moq_x265::is_hardware_acceleration_available() {
+            match moq_x265::create_hardware_encoder(width, height, bitrate, fps, keyframe_interval) {
+                Ok(hw_encoder) => {
+                    tracing::info!("Using NVIDIA hardware encoder");
+                    (hw_encoder, true)
+                },
+                Err(e) => {
+                    tracing::warn!("Failed to create hardware encoder: {}, falling back to software", e);
+                    let sw_encoder = moq_x265::X265Encoder::new(width, height, bitrate, fps, keyframe_interval)?;
+                    (Box::new(sw_encoder) as Box<dyn Encoder>, false)
+                }
+            }
+        } else {
+            tracing::info!("Hardware acceleration not available, using software encoder");
+            let sw_encoder = moq_x265::X265Encoder::new(width, height, bitrate, fps, keyframe_interval)?;
+            (Box::new(sw_encoder) as Box<dyn Encoder>, false)
+        };
         
         Ok(Self {
             width,
@@ -36,17 +53,22 @@ impl HEVCEncoder {
             bitrate,
             fps,
             encoder,
+            using_hardware,
         })
     }
     
     pub fn encode_frame(&mut self, frame: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<EncodedFrame> {
-        // Encode the frame using x265
-        self.encoder.encode_frame(frame)
+        // Encode the frame using the selected encoder
+        self.encoder.encode(frame)
+    }
+    
+    pub fn is_using_hardware(&self) -> bool {
+        self.using_hardware
     }
 }
 
 impl Drop for HEVCEncoder {
     fn drop(&mut self) {
-        // The X265Encoder will clean up resources in its own Drop implementation
+        // The encoder will clean up resources in its own Drop implementation
     }
 } 
