@@ -138,7 +138,7 @@ async fn main() -> anyhow::Result<()> {
 	
 	// Initialize QUIC
 	let quic_args = quic::Args {
-		bind: "[::]:0".parse().unwrap(),
+		bind: "0.0.0.0:0".parse().unwrap(),
 		tls: args.tls.into(),
 	};
 	
