@@ -24,8 +24,10 @@ pub struct HEVCEncoder {
 
 impl HEVCEncoder {
     pub fn new(width: u32, height: u32, bitrate: u32, fps: u32) -> Result<Self> {
-        // Default keyframe interval to 2 seconds (2 * fps)
-        let keyframe_interval = 2 * fps;
+        // Use a shorter keyframe interval (1 second) for better compatibility
+        let keyframe_interval = fps;
+        
+        // Create encoder with default settings
         let encoder = X265Encoder::new(width, height, bitrate, fps, keyframe_interval)?;
         
         Ok(Self {

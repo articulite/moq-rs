@@ -14,4 +14,4 @@ Set-Location -Path "$PSScriptRoot\moq-receiver"
 # Run the receiver
 Write-Host "Starting MoQ Receiver..."
 Write-Host "X265_DIR: $env:X265_DIR"
-cargo run -- --server https://127.0.0.1:4443 --name desktop --width 640 --height 480 --latency 500 --tls-disable-verify 
+cargo run -- --server https://127.0.0.1:4443 --name desktop --width 640 --height 480 --latency 500 --disable-verify 

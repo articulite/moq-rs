@@ -254,6 +254,30 @@ impl X265Encoder {
             }))
         }
     }
+    
+    /// Set a parameter on the x265 encoder
+    pub fn set_param(&mut self, name: &str, value: &str) -> Result<()> {
+        let name_cstr = CString::new(name).map_err(|_| anyhow!("Invalid parameter name"))?;
+        let value_cstr = CString::new(value).map_err(|_| anyhow!("Invalid parameter value"))?;
+        
+        unsafe {
+            if self.param.is_null() {
+                return Err(anyhow!("Encoder parameters not initialized"));
+            }
+            
+            let result = x265_param_parse(self.param, name_cstr.as_ptr(), value_cstr.as_ptr());
+            if result < 0 {
+                return Err(anyhow!("Failed to set parameter {} to {}", name, value));
+            }
+            
+            // Apply the parameter to the encoder
+            if !self.encoder.is_null() {
+                x265_encoder_reconfig(self.encoder, self.param);
+            }
+        }
+        
+        Ok(())
+    }
 }
 
 impl Drop for X265Encoder {
