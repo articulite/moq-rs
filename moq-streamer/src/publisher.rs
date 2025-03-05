@@ -26,7 +26,7 @@ impl MoqPublisher {
     ) -> Result<Self> {
         // Initialize QUIC endpoint
         let quic_config = quic::Config {
-            bind: "[::]:0".parse().unwrap(),
+            bind: "0.0.0.0:0".parse().unwrap(),
             tls: tls_args.load().context("Failed to load TLS config")?,
         };
         
