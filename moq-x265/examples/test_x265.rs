@@ -5,6 +5,7 @@ use std::time::{Duration, Instant};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+use std::process::Command;
 
 fn main() -> Result<()> {
     println!("Testing x265 encoder and decoder...");
@@ -102,12 +103,48 @@ fn main() -> Result<()> {
              encoded_frames.len() as f64 / encoding_time.as_secs_f64());
     
     // Save all frames to a single file
-    let all_frames_path = "output/all_frames.hevc";
-    let mut all_frames_file = File::create(all_frames_path)?;
+    let raw_hevc_path = "output/all_frames.hevc";
+    let mut all_frames_file = File::create(raw_hevc_path)?;
     for frame in &encoded_frames {
         all_frames_file.write_all(&frame.data)?;
     }
-    println!("Saved all frames to {}", all_frames_path);
+    println!("Saved all frames to {}", raw_hevc_path);
+    
+    // Create an MP4 file from the raw HEVC bitstream
+    // This requires ffmpeg to be installed on the system
+    let mp4_path = "output/color_alternating.mp4";
+    println!("Creating MP4 file at {}", mp4_path);
+    
+    // Check if ffmpeg is available
+    let ffmpeg_result = Command::new("ffmpeg")
+        .arg("-version")
+        .output();
+    
+    match ffmpeg_result {
+        Ok(_) => {
+            // Create MP4 file using ffmpeg
+            let status = Command::new("ffmpeg")
+                .args([
+                    "-f", "hevc",                // Input format is raw HEVC
+                    "-i", raw_hevc_path,         // Input file
+                    "-c:v", "copy",              // Copy video stream without re-encoding
+                    "-y",                        // Overwrite output file if it exists
+                    mp4_path                     // Output file
+                ])
+                .status()?;
+            
+            if status.success() {
+                println!("Successfully created MP4 file at {}", mp4_path);
+                println!("You can now play this file in any video player that supports HEVC/H.265");
+            } else {
+                println!("Failed to create MP4 file. ffmpeg exited with status: {}", status);
+            }
+        },
+        Err(_) => {
+            println!("ffmpeg not found. To create an MP4 file, install ffmpeg and run:");
+            println!("ffmpeg -f hevc -i {} -c:v copy {}", raw_hevc_path, mp4_path);
+        }
+    }
     
     // Decode frames
     let start_time = Instant::now();

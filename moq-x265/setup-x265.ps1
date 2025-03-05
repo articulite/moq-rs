@@ -36,12 +36,56 @@ Write-Host "Added $binDir to PATH for the current session"
 
 # Check if the x265 library is available
 if (Test-Path "$binDir\x265.dll") {
-    Write-Host "x265 library installed successfully!"
+    Write-Host "x265 library installed successfully!" -ForegroundColor Green
 } else {
     Write-Host "Error: x265 library not found after installation" -ForegroundColor Red
     Write-Host "Looking for x265.dll in $binDir" -ForegroundColor Yellow
     Get-ChildItem -Path $binDir -Recurse | ForEach-Object { Write-Host $_.FullName }
     exit 1
+}
+
+# Check for FFmpeg
+$ffmpegPath = $null
+try {
+    $ffmpegPath = (Get-Command ffmpeg -ErrorAction Stop).Source
+    Write-Host "FFmpeg found at: $ffmpegPath" -ForegroundColor Green
+} catch {
+    Write-Host "FFmpeg not found in PATH" -ForegroundColor Yellow
+    
+    # Check common FFmpeg installation locations
+    $commonPaths = @(
+        "C:\ffmpeg\bin",
+        "C:\Program Files\ffmpeg\bin",
+        "C:\Program Files (x86)\ffmpeg\bin"
+    )
+    
+    foreach ($path in $commonPaths) {
+        if (Test-Path "$path\ffmpeg.exe") {
+            Write-Host "FFmpeg found at $path\ffmpeg.exe" -ForegroundColor Green
+            $ffmpegPath = $path
+            break
+        }
+    }
+    
+    if ($ffmpegPath) {
+        # Add FFmpeg to PATH for current session
+        $env:PATH = "$ffmpegPath;$env:PATH"
+        Write-Host "Added $ffmpegPath to PATH for the current session" -ForegroundColor Green
+        
+        # Ask if user wants to add FFmpeg to PATH permanently
+        $addToPath = Read-Host "Do you want to add FFmpeg to your PATH permanently? (y/n)"
+        if ($addToPath -eq "y") {
+            $currentPath = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+            if (-not $currentPath.Contains($ffmpegPath)) {
+                [System.Environment]::SetEnvironmentVariable("PATH", "$currentPath;$ffmpegPath", [System.EnvironmentVariableTarget]::User)
+                Write-Host "Added FFmpeg to user PATH environment variable" -ForegroundColor Green
+            }
+        }
+    } else {
+        Write-Host "FFmpeg not found. Some features like MP4 creation will not work." -ForegroundColor Yellow
+        Write-Host "To install FFmpeg, download it from https://ffmpeg.org/download.html" -ForegroundColor Yellow
+        Write-Host "After installation, add the bin directory to your PATH" -ForegroundColor Yellow
+    }
 }
 
 Write-Host "x265 setup complete!" -ForegroundColor Green

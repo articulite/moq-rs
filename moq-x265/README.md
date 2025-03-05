@@ -68,6 +68,60 @@ On macOS, you can install x265 using Homebrew:
 brew install x265
 ```
 
+## FFmpeg for MP4 Creation
+
+The test example can create MP4 files from the encoded HEVC bitstream, which requires FFmpeg to be installed on your system.
+
+### Windows
+
+On Windows, you can install FFmpeg using one of the following methods:
+
+1. **Download from the official website**:
+   - Download FFmpeg from [the official website](https://ffmpeg.org/download.html)
+   - Extract the files to a directory of your choice (e.g., `C:\ffmpeg`)
+   - Add the bin directory to your PATH:
+     ```powershell
+     $env:PATH = "C:\ffmpeg\bin;$env:PATH"
+     ```
+
+2. **Using Chocolatey**:
+   ```powershell
+   choco install ffmpeg
+   ```
+
+3. **Using Scoop**:
+   ```powershell
+   scoop install ffmpeg
+   ```
+
+The setup and test scripts will automatically detect FFmpeg if it's installed in one of the common locations and add it to your PATH for the current session.
+
+### Linux
+
+On Linux, you can install FFmpeg using your package manager:
+
+#### Ubuntu/Debian:
+```
+sudo apt-get install ffmpeg
+```
+
+#### Fedora:
+```
+sudo dnf install ffmpeg
+```
+
+#### Arch Linux:
+```
+sudo pacman -S ffmpeg
+```
+
+### macOS
+
+On macOS, you can install FFmpeg using Homebrew:
+```
+brew install ffmpeg
+```
+
 ## Usage
 
 Add this to your `Cargo.toml`:
@@ -111,6 +165,14 @@ Or use the provided PowerShell script on Windows:
 .\test-x265.ps1
 ```
 
+The test example will:
+1. Create an encoder with a 640x480 resolution
+2. Generate a sequence of alternating purple and blue frames
+3. Encode the frames using x265
+4. Save the encoded frames to the `output` directory
+5. Create an MP4 file if FFmpeg is available
+6. Attempt to decode the frames (note: full decoding is not yet implemented)
+
 ## Troubleshooting
 
 ### Windows
@@ -127,6 +189,18 @@ You can check the directory structure with:
 ```powershell
 Get-ChildItem -Path $env:X265_DIR -Recurse
 ```
+
+If you encounter issues with FFmpeg:
+
+1. Make sure FFmpeg is installed and in your PATH
+2. You can check if FFmpeg is available with:
+   ```powershell
+   where ffmpeg
+   ```
+3. If FFmpeg is not found, you can manually create an MP4 file with:
+   ```powershell
+   ffmpeg -f hevc -i output/all_frames.hevc -c:v copy output/color_alternating.mp4
+   ```
 
 ### Linux/macOS
 
